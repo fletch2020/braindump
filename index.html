@@ -329,6 +329,17 @@
   .send-options-panel .send-label { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
   .send-options-panel .send-sublabel { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
   .send-method-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  /* CALENDAR BUTTON */
+  .cal-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px;
+    background: #ede9f8; color: #5b21b6;
+    border: 2px solid #c084fc; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .cal-btn:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
 </style>
 </head>
 <body>
@@ -527,6 +538,7 @@
     <div class="modal-actions">
       <button class="btn btn-danger btn-sm" id="modal-delete-btn">🗑 Delete</button>
       <button class="btn btn-primary btn-sm" id="modal-done-btn">✅ Mark Done</button>
+      <button class="btn btn-sm" id="modal-cal-btn" style="background:#ede9f8; color:#2d1f42; display:none;">📅 Add to Calendar</button>
       <button class="btn btn-sm" onclick="closeModal()" style="background:#ede9f8; color:#2d1f42;">Close</button>
     </div>
   </div>
@@ -661,10 +673,11 @@ function renderAllItems() {
         <div class="item-title">${item.title}</div>
         ${item.notes?`<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>`:''}
         ${item.date?`<div class="item-meta">📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}</div>`:''}
-        <div>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
           <span class="item-tag tag-${item.type}">${item.type==='note'?'📌 Note':'⏰ Reminder'}</span>
-          ${item.forPartner?'<span class="item-tag tag-partner" style="margin-left:4px;">💌 To share</span>':''}
-          ${item.done?'<span class="item-tag" style="background:#e8f5f0;color:#c084fc;margin-left:4px;">✅ Done</span>':''}
+          ${item.forPartner?'<span class="item-tag tag-partner">💌 To share</span>':''}
+          ${item.done?'<span class="item-tag" style="background:#e8f5f0;color:#c084fc;">✅ Done</span>':''}
+          ${item.date?`<button class="cal-btn" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button>`:''}
         </div>
         ${quickBtns}
       </div>
@@ -777,6 +790,14 @@ function openModal(id) {
   document.getElementById('modal-delete-btn').onclick = () => { deleteItem(id); closeModal(); };
   document.getElementById('modal-done-btn').onclick = () => { markDone(id); closeModal(); };
   document.getElementById('modal-done-btn').textContent = item.done ? '↩ Unmark Done' : '✅ Mark Done';
+  // Show calendar button for reminders with a date
+  const calBtn = document.getElementById('modal-cal-btn');
+  if (item.date) {
+    calBtn.style.display = 'inline-flex';
+    calBtn.onclick = () => addToCalendar(id);
+  } else {
+    calBtn.style.display = 'none';
+  }
 
   const sendBtns = document.getElementById('modal-send-btns');
   if (item.forPartner) {
@@ -832,35 +853,66 @@ function copyText(message) {
     .then(() => showToast('📋 Copied!'));
 }
 
-function getNoteDetails() {
-  const name = document.getElementById('inline-contact-name').value || '';
-  const contact = settings.contacts.find(c => c.name === name) || {};
-  return {
-    name,
-    phone: contact.phone || '',
-    text: (document.getElementById('item-title').value||'') + ((document.getElementById('item-notes').value||'') ? '\n'+(document.getElementById('item-notes').value) : '')
-  };
+// ——— CALENDAR EXPORT ———
+function generateICS(title, notes, date, time) {
+  const dateStr = date.replace(/-/g, '');
+  let dtStart, dtEnd;
+  if (time) {
+    const timeStr = time.replace(':', '') + '00';
+    dtStart = dateStr + 'T' + timeStr;
+    const [h, m] = time.split(':').map(Number);
+    const endH = String(h + 1).padStart(2, '0');
+    dtEnd = dateStr + 'T' + endH + String(m).padStart(2, '0') + '00';
+  } else {
+    dtStart = dateStr;
+    const nextDay = new Date(date + 'T00:00:00');
+    nextDay.setDate(nextDay.getDate() + 1);
+    dtEnd = nextDay.toISOString().split('T')[0].replace(/-/g, '');
+  }
+  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+  const uid = 'dontforget-' + Date.now() + '@dontforget';
+  const desc = (notes || '').split('\n').join('\\n');
+  const isAllDay = !time;
+  const dtStartLine = isAllDay ? 'DTSTART;VALUE=DATE:' + dtStart : 'DTSTART:' + dtStart;
+  const dtEndLine   = isAllDay ? 'DTEND;VALUE=DATE:'   + dtEnd   : 'DTEND:'   + dtEnd;
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//DontForget//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'UID:' + uid,
+    'DTSTAMP:' + now,
+    dtStartLine,
+    dtEndLine,
+    'SUMMARY:' + title,
+    desc ? 'DESCRIPTION:' + desc : '',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT30M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Reminder: ' + title,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ];
+  return lines.filter(Boolean).join('\r\n');
 }
 
-function sendNoteWhatsApp() {
-  const { name, phone, text } = getNoteDetails();
-  if (!text.trim()) { alert('Please enter something to remember first!'); return; }
-  const fullMsg = `${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
-  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
-}
-
-function sendNoteSMS() {
-  const { name, phone, text } = getNoteDetails();
-  if (!text.trim()) { alert('Please enter something to remember first!'); return; }
-  const fullMsg = encodeURIComponent(`${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`);
-  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
-  window.location.href = `sms:${phone}${sep}body=${fullMsg}`;
-}
-
-function copyNoteMessage() {
-  const { name, text } = getNoteDetails();
-  const fullMsg = `${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
-  navigator.clipboard.writeText(fullMsg).then(() => showToast('📋 Copied!'));
+function addToCalendar(id) {
+  const item = items.find(i => i.id === id);
+  if (!item || !item.date) { showToast('No date set for this reminder!'); return; }
+  const ics = generateICS(item.title, item.notes, item.date, item.time);
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = item.title.replace(/[^a-z0-9]/gi, '_') + '.ics';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  showToast('📅 Opening in your calendar app!');
 }
 
 // ——— NOTIFICATIONS ———
