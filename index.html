@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Don't Forget! 🧠</title>
+<meta name="description" content="Your friendly memory helper">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Don't Forget!">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -29,127 +34,127 @@
                       radial-gradient(circle at 80% 80%, #d4f5e9 0%, transparent 50%);
   }
 
-  header {
-    text-align: center;
-    padding: 32px 20px 16px;
-  }
-  header h1 {
-    font-family: 'Caveat', cursive;
-    font-size: 3rem;
-    color: var(--accent1);
-    line-height: 1;
-  }
-  header p {
-    color: var(--muted);
-    font-size: 0.95rem;
-    margin-top: 6px;
-  }
-
-  .notification-bar {
-    background: var(--accent3);
-    color: white;
-    text-align: center;
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 0.9rem;
+  /* INSTALL BANNER */
+  .install-banner {
     display: none;
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: white;
+    padding: 14px 20px;
+    text-align: center;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(255,107,107,0.4);
+  }
+  .install-banner p { font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; }
+  .install-banner .install-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .install-btn-main {
+    background: white; color: var(--accent1);
+    border: none; border-radius: 50px;
+    padding: 9px 20px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .install-btn-main:hover { transform: scale(1.03); }
+  .install-btn-dismiss {
+    background: rgba(255,255,255,0.2); color: white;
+    border: 2px solid rgba(255,255,255,0.5); border-radius: 50px;
+    padding: 9px 16px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  /* IOS MODAL */
+  .ios-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000; align-items: flex-end; justify-content: center; padding: 20px;
+  }
+  .ios-modal.open { display: flex; }
+  .ios-box {
+    background: white; border-radius: 20px; padding: 28px 24px;
+    max-width: 400px; width: 100%;
+    animation: slideUp 0.3s ease; text-align: center;
+  }
+  .ios-box h3 { font-family: 'Caveat', cursive; font-size: 1.8rem; color: var(--accent1); margin-bottom: 8px; }
+  .ios-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
+  .ios-steps { text-align: left; background: var(--bg); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+  .ios-step { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0e4d4; font-size: 0.9rem; font-weight: 600; }
+  .ios-step:last-child { border-bottom: none; }
+  .ios-step-num { background: var(--accent1); color: white; border-radius: 50%; width: 26px; height: 26px; min-width: 26px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.8rem; }
+
+  .notification-bar {
+    background: var(--accent3); color: white;
+    text-align: center; padding: 10px 20px;
+    font-weight: 700; font-size: 0.9rem;
+    display: none; position: sticky; top: 0; z-index: 100;
     border-bottom: 3px solid #04b589;
   }
 
+  header { text-align: center; padding: 28px 20px 8px; }
+  header h1 { font-family: 'Caveat', cursive; font-size: 3rem; color: var(--accent1); line-height: 1; }
+  header p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+  .install-header-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px;
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: white; border: none; border-radius: 50px;
+    padding: 10px 24px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255,107,107,0.35);
+    transition: all 0.2s;
+  }
+  .install-header-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.45); }
+  .install-header-btn.hidden { display: none; }
+
   .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 20px;
-    flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 10px;
+    padding: 14px 20px; flex-wrap: wrap;
   }
   .tab-btn {
-    padding: 10px 22px;
-    border: 3px solid transparent;
-    border-radius: 50px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-    color: var(--muted);
-    box-shadow: var(--shadow);
+    padding: 10px 22px; border: 3px solid transparent; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.2s;
+    background: white; color: var(--muted); box-shadow: var(--shadow);
   }
   .tab-btn.active { background: var(--accent1); color: white; border-color: var(--accent1); }
   .tab-btn:hover:not(.active) { border-color: var(--accent1); color: var(--accent1); }
 
-  .container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 20px 40px;
-  }
-
+  .container { max-width: 680px; margin: 0 auto; padding: 0 20px 40px; }
   .panel { display: none; }
   .panel.active { display: block; }
 
   .card {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-    border: 2px solid #f0e4d4;
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 20px;
+    box-shadow: var(--shadow); border: 2px solid #f0e4d4;
   }
-  .card h2 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .card h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-  input[type="text"], input[type="date"], input[type="time"], textarea, select {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e8ddd4;
-    border-radius: 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.95rem;
-    background: white;
-    color: var(--text);
-    margin-bottom: 12px;
-    transition: border-color 0.2s;
-    outline: none;
+  input[type="text"], input[type="date"], input[type="time"], textarea {
+    width: 100%; padding: 12px 16px;
+    border: 2px solid #e8ddd4; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+    background: white; color: var(--text);
+    margin-bottom: 12px; transition: border-color 0.2s; outline: none;
   }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent1); }
+  input:focus, textarea:focus { border-color: var(--accent1); }
   textarea { min-height: 80px; resize: vertical; }
 
   label {
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--muted);
-    display: block;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 700; font-size: 0.85rem; color: var(--muted);
+    display: block; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.05em;
   }
-
   .form-group { margin-bottom: 4px; }
-  .row { display: flex; gap: 12px; }
-  .row .form-group { flex: 1; }
 
   .btn {
-    padding: 13px 28px;
-    border: none;
-    border-radius: 50px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    padding: 13px 28px; border: none; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
   }
   .btn-primary { background: var(--accent1); color: white; }
   .btn-primary:hover { background: #e55555; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,107,0.3); }
@@ -163,23 +168,12 @@
 
   .items-list { display: flex; flex-direction: column; gap: 12px; }
   .item-card {
-    background: white;
-    border-radius: 14px;
-    padding: 16px 18px;
-    border: 2px solid #f0e4d4;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
+    background: white; border-radius: 14px;
+    padding: 16px 18px; border: 2px solid #f0e4d4;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer;
   }
-  .item-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 5px;
-  }
+  .item-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
   .item-card.type-note::before { background: var(--accent4); }
   .item-card.type-reminder::before { background: var(--accent1); }
   .item-card.type-partner::before { background: var(--accent2); }
@@ -189,186 +183,106 @@
   .item-icon { font-size: 1.6rem; flex-shrink: 0; }
   .item-body { flex: 1; min-width: 0; }
   .item-title { font-weight: 700; font-size: 1rem; margin-bottom: 3px; }
-  .item-meta { font-size: 0.8rem; color: var(--muted); }
+  .item-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
   .item-tag {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 50px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    margin-top: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    display: inline-block; padding: 2px 10px; border-radius: 50px;
+    font-size: 0.72rem; font-weight: 800; margin-top: 6px;
+    text-transform: uppercase; letter-spacing: 0.04em;
   }
   .tag-note { background: #dff0fb; color: var(--accent4); }
   .tag-reminder { background: #ffe5e5; color: var(--accent1); }
   .tag-partner { background: #fff3cc; color: #b8860b; }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* QUICK CONTACT BUTTONS */
+  .quick-contacts {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 2px dashed #f0e4d4;
   }
+  .quick-contacts-label {
+    font-size: 0.72rem; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px;
+  }
+  .quick-contact-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .quick-contact-btn {
+    padding: 7px 14px;
+    border: 2px solid var(--accent2); border-radius: 50px;
+    background: #fffbea; color: #2d2d2d;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .quick-contact-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .quick-contact-btn.selected { background: var(--accent2); border-color: #f5c800; }
 
-  .item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-
+  /* NOTIFY ROW */
   .notify-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: white;
-    border: 2px solid #f0e4d4;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+    background: white; border: 2px solid #f0e4d4;
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 12px;
   }
   .notify-row .info { flex: 1; }
   .notify-row .info strong { display: block; font-size: 0.95rem; }
   .notify-row .info small { color: var(--muted); font-size: 0.82rem; }
 
-  .toggle {
-    position: relative;
-    width: 50px;
-    height: 26px;
-    flex-shrink: 0;
-  }
+  .toggle { position: relative; width: 50px; height: 26px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track {
-    position: absolute;
-    inset: 0;
-    background: #ddd;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  .toggle-track::after {
-    content: '';
-    position: absolute;
-    left: 3px; top: 3px;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: white;
-    transition: 0.3s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
+  .toggle-track { position: absolute; inset: 0; background: #ddd; border-radius: 50px; cursor: pointer; transition: 0.3s; }
+  .toggle-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
   .toggle input:checked + .toggle-track { background: var(--accent3); }
   .toggle input:checked + .toggle-track::after { transform: translateX(24px); }
 
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-  }
+  .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
   .checkbox-item input { display: none; }
-  .checkbox-box {
-    width: 20px; height: 20px;
-    border: 2px solid #e8ddd4;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .checkbox-item input:checked + .checkbox-box {
-    background: var(--accent3);
-    border-color: var(--accent3);
-  }
+  .checkbox-box { width: 20px; height: 20px; border: 2px solid #e8ddd4; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .checkbox-item input:checked + .checkbox-box { background: var(--accent3); border-color: var(--accent3); }
   .checkbox-item input:checked + .checkbox-box::after { content: '✓'; color: white; font-size: 12px; font-weight: 900; }
 
-  /* CHECKLIST CHECK CIRCLE */
   .check-circle {
-    width: 32px; height: 32px;
-    border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 50%;
     border: 3px solid #e0d0c8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    font-size: 1rem;
-    font-weight: 900;
-    color: white;
-    background: white;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    font-size: 1rem; font-weight: 900; color: white; background: white;
     transition: all 0.2s;
   }
   .check-circle:hover { border-color: var(--accent3); }
   .check-circle.checked { background: var(--accent3); border-color: var(--accent3); }
 
   .checklist-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0e4d4;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid #f0e4d4;
   }
   .checklist-item:last-child { border-bottom: none; }
-  .checklist-item label { cursor: pointer; flex: 1; font-weight: 600; }
   .checklist-done { text-decoration: line-through; color: var(--muted); }
 
-  .partner-preview {
-    background: linear-gradient(135deg, #fff3cc, #ffe8a0);
-    border: 2px dashed var(--accent2);
-    border-radius: 14px;
-    padding: 18px;
-    margin-top: 12px;
-    font-family: 'Caveat', cursive;
-    font-size: 1.2rem;
-    line-height: 1.5;
-    display: none;
-  }
-
-  .empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-  }
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
   .empty p { font-size: 0.95rem; }
 
   .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    padding: 20px;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999; padding: 20px;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 28px;
-    max-width: 420px;
-    width: 100%;
+    background: var(--card); border-radius: var(--radius);
+    padding: 28px; max-width: 420px; width: 100%;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     animation: slideUp 0.3s ease;
+    max-height: 90vh; overflow-y: auto;
   }
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .modal h3 { font-size: 1.3rem; margin-bottom: 16px; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h3 { font-size: 1.3rem; margin-bottom: 12px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; flex-wrap: wrap; }
 
-  .type-picker {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
+  .type-picker { display: flex; gap: 10px; margin-bottom: 16px; }
   .type-option {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #e8ddd4;
-    border-radius: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 700;
-    font-size: 0.85rem;
+    flex: 1; padding: 12px; border: 2px solid #e8ddd4; border-radius: 12px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    font-weight: 700; font-size: 0.85rem;
   }
   .type-option.selected { border-color: var(--accent1); background: #fff0f0; color: var(--accent1); }
   .type-option .type-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
@@ -376,50 +290,71 @@
   .reminder-options { display: none; }
   .reminder-options.show { display: block; }
 
-  .pre-remind-options {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
+  .pre-remind-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .pre-remind-btn {
-    padding: 8px 14px;
-    border: 2px solid #e8ddd4;
-    border-radius: 50px;
-    background: white;
-    cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 0.8rem;
+    padding: 8px 14px; border: 2px solid #e8ddd4; border-radius: 50px;
+    background: white; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.8rem;
     transition: all 0.2s;
   }
   .pre-remind-btn.selected { border-color: var(--accent4); background: #dff0fb; color: var(--accent4); }
 
   .section-title {
-    font-family: 'Caveat', cursive;
-    font-size: 1.8rem;
-    color: var(--text);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-family: 'Caveat', cursive; font-size: 1.8rem; color: var(--text);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
   }
 
-  .badge {
-    background: var(--accent1);
-    color: white;
-    border-radius: 50%;
-    width: 20px; height: 20px;
-    font-size: 0.7rem;
-    font-weight: 900;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 4px;
+  /* CONTACT SLOTS IN SETTINGS */
+  .contact-slot {
+    background: white; border: 2px solid #f0e4d4;
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
   }
+  .contact-slot-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .contact-number {
+    background: var(--accent1); color: white; border-radius: 50%;
+    width: 28px; height: 28px; min-width: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 0.85rem;
+  }
+  .contact-slot h3 { font-size: 0.95rem; font-weight: 800; }
+  .contact-inputs { display: flex; gap: 10px; }
+  .contact-inputs input { flex: 1; margin-bottom: 0; }
+
+  /* SEND PANEL inside Add form */
+  .send-options-panel {
+    display: none; margin-top: 14px;
+    background: #fffbea; border: 2px solid var(--accent2);
+    border-radius: 14px; padding: 16px;
+  }
+  .send-options-panel .send-label { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
+  .send-options-panel .send-sublabel { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+  .send-method-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 </style>
 </head>
 <body>
+
+<!-- INSTALL BANNER (Android/Chrome) -->
+<div class="install-banner" id="installBanner">
+  <p>📲 Add Don't Forget! to your home screen for instant access</p>
+  <div class="install-btns">
+    <button class="install-btn-main" onclick="triggerInstall()">📲 Add to Home Screen</button>
+    <button class="install-btn-dismiss" onclick="dismissBanner()">Not now</button>
+  </div>
+</div>
+
+<!-- IOS INSTRUCTIONS MODAL -->
+<div class="ios-modal" id="iosModal">
+  <div class="ios-box">
+    <h3>Add to Home Screen 📲</h3>
+    <p>Follow these steps in Safari to install Don't Forget! as an app on your iPhone:</p>
+    <div class="ios-steps">
+      <div class="ios-step"><div class="ios-step-num">1</div><div>Tap the <strong>Share button</strong> at the bottom of Safari — it looks like a box with an arrow pointing up ⬆</div></div>
+      <div class="ios-step"><div class="ios-step-num">2</div><div>Scroll down the menu and tap <strong>"Add to Home Screen"</strong></div></div>
+      <div class="ios-step"><div class="ios-step-num">3</div><div>Tap <strong>"Add"</strong> in the top right — done! 🎉</div></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeIosModal()">Got it! 👍</button>
+  </div>
+</div>
 
 <div class="notification-bar" id="notifBar">
   🔔 Daily reminder: Check your list! You have <span id="notifCount">0</span> things to review tonight.
@@ -428,6 +363,10 @@
 <header>
   <h1>🧠 Don't Forget!</h1>
   <p>Your friendly memory helper — for those of us who need a little nudge!</p>
+  <br>
+  <button class="install-header-btn hidden" id="installHeaderBtn" onclick="handleInstallClick()">
+    📲 Use as App
+  </button>
 </header>
 
 <div class="tabs">
@@ -449,7 +388,6 @@
         <button class="btn btn-secondary btn-sm" onclick="resetChecklist()">↺ Reset Ticks</button>
       </div>
     </div>
-
     <div class="section-title">All My Things</div>
     <div id="all-items-list" class="items-list">
       <div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>
@@ -474,7 +412,6 @@
         <label>What do you need to remember?</label>
         <input type="text" id="item-title" placeholder="e.g. We're out for tea on Friday!">
       </div>
-
       <div class="form-group">
         <label>Any extra details? (optional)</label>
         <textarea id="item-notes" placeholder="Any extra info..."></textarea>
@@ -507,13 +444,16 @@
         </label>
       </div>
 
-      <div id="send-contact-options" style="display:none; margin-top:14px; background:#fffbea; border:2px solid var(--accent2); border-radius:14px; padding:16px;">
-        <div style="font-weight:800; font-size:0.9rem; margin-bottom:10px;">📲 Send it to them now?</div>
+      <!-- SEND OPTIONS — shown when checkbox ticked -->
+      <div class="send-options-panel" id="send-contact-options">
+        <div class="send-label">📲 Send it to them now?</div>
+        <div class="send-sublabel">Tap a contact or type a name below:</div>
+        <div id="inline-quick-contacts" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
         <div class="form-group">
-          <label>Their name (e.g. Mum, Sarah, Dave)</label>
-          <input type="text" id="inline-contact-name" placeholder="e.g. Mum">
+          <label>Or type their name</label>
+          <input type="text" id="inline-contact-name" placeholder="e.g. Mum" style="margin-bottom:0;">
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <div class="send-method-btns">
           <button class="btn btn-partner btn-sm" onclick="sendNoteWhatsApp()">📱 WhatsApp</button>
           <button class="btn btn-secondary btn-sm" onclick="sendNoteSMS()">💬 SMS</button>
           <button class="btn btn-sm" style="background:#eee;" onclick="copyNoteMessage()">📋 Copy</button>
@@ -534,7 +474,6 @@
     <div class="card">
       <h2>🔔 Evening Reminder</h2>
       <p style="color:var(--muted); font-size:0.88rem; margin-bottom:16px;">Get a browser notification each evening to check your list.</p>
-
       <div class="notify-row">
         <div class="info">
           <strong>Enable Evening Reminder</strong>
@@ -545,26 +484,25 @@
           <span class="toggle-track"></span>
         </label>
       </div>
-
       <div class="form-group">
         <label>Reminder time</label>
-        <input type="time" id="notif-time" value="19:00" onchange="saveSettings()">
+        <input type="time" id="notif-time" value="19:00" onchange="saveSettingsSilent()">
       </div>
-
       <button class="btn btn-secondary btn-sm" onclick="testNotification()">🔔 Test Notification Now</button>
     </div>
 
+    <!-- 5 CONTACTS -->
     <div class="card">
-      <h2>👤 Default Contact Settings</h2>
-      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:12px;">Set a default contact so you don't have to type it every time.</p>
-      <div class="form-group">
-        <label>Default contact name</label>
-        <input type="text" id="settings-partner-name" placeholder="e.g. Sarah, Mum, Dave" oninput="saveSettings()">
-      </div>
-      <div class="form-group">
-        <label>Default phone number (with country code)</label>
-        <input type="text" id="settings-partner-phone" placeholder="e.g. +447911123456" oninput="saveSettings()">
-      </div>
+      <h2>👥 Your 5 Quick Contacts</h2>
+      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:16px;">Save up to 5 people you message regularly. Their names appear as quick-tap buttons whenever you flag something to share — no typing needed!</p>
+      <div id="contacts-settings-list"></div>
+      <button class="btn btn-primary btn-sm" onclick="saveContacts()" style="margin-top:4px;">💾 Save Contacts</button>
+    </div>
+
+    <div class="card">
+      <h2>📲 Install App</h2>
+      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Add Don't Forget! to your phone's home screen — opens like a proper app, no browser bar!</p>
+      <button class="btn btn-primary" onclick="handleInstallClick()">📲 Use as App</button>
     </div>
 
     <div class="card">
@@ -578,12 +516,13 @@
 
 </div>
 
-<!-- MODAL -->
+<!-- ITEM MODAL -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal" id="modal-content">
     <h3 id="modal-title"></h3>
-    <p id="modal-notes" style="color:var(--muted); margin-bottom:12px; font-size:0.9rem;"></p>
-    <div id="modal-meta" style="font-size:0.85rem; color: var(--accent4); font-weight:700; margin-bottom:8px;"></div>
+    <p id="modal-notes" style="color:var(--muted); margin-bottom:10px; font-size:0.9rem;"></p>
+    <div id="modal-meta" style="font-size:0.82rem; color: var(--accent4); font-weight:700; margin-bottom:10px;"></div>
+    <div id="modal-send-btns"></div>
     <div class="modal-actions">
       <button class="btn btn-danger btn-sm" id="modal-delete-btn">🗑 Delete</button>
       <button class="btn btn-primary btn-sm" id="modal-done-btn">✅ Mark Done</button>
@@ -593,22 +532,29 @@
 </div>
 
 <script>
+// ——— DATA ———
 let items = JSON.parse(localStorage.getItem('df_items') || '[]');
-let settings = JSON.parse(localStorage.getItem('df_settings') || '{"notifTime":"19:00","partnerName":"","partnerPhone":"","notifEnabled":false}');
+let settings = JSON.parse(localStorage.getItem('df_settings') || JSON.stringify({
+  notifTime: '19:00',
+  notifEnabled: false,
+  contacts: [{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''}]
+}));
+if (!settings.contacts) {
+  settings.contacts = [
+    {name: settings.partnerName||'', phone: settings.partnerPhone||''},
+    {name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''}
+  ];
+}
 let checkedToday = JSON.parse(localStorage.getItem('df_checked') || '[]');
 let currentType = 'note';
 let preReminds = [];
 let notifInterval = null;
+let deferredInstallPrompt = null;
 
 function save() { localStorage.setItem('df_items', JSON.stringify(items)); }
+function persistSettings() { localStorage.setItem('df_settings', JSON.stringify(settings)); }
 
-function saveSettings() {
-  settings.notifTime = document.getElementById('notif-time').value;
-  settings.partnerName = document.getElementById('settings-partner-name').value;
-  settings.partnerPhone = document.getElementById('settings-partner-phone').value;
-  localStorage.setItem('df_settings', JSON.stringify(settings));
-}
-
+// ——— TABS ———
 function showTab(tab) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -617,48 +563,40 @@ function showTab(tab) {
   renderAll();
 }
 
+// ——— TYPE PICKER ———
 function selectType(type) {
   currentType = type;
   document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('type-' + type).classList.add('selected');
-  const ro = document.getElementById('reminder-options');
-  if (type === 'reminder') ro.classList.add('show');
-  else ro.classList.remove('show');
+  document.getElementById('reminder-options').classList.toggle('show', type === 'reminder');
 }
 
 function togglePreRemind(btn, val) {
   btn.classList.toggle('selected');
-  if (preReminds.includes(val)) preReminds = preReminds.filter(v => v !== val);
-  else preReminds.push(val);
+  preReminds = preReminds.includes(val) ? preReminds.filter(v => v !== val) : [...preReminds, val];
 }
 
+// ——— SAVE ITEM ———
 function saveItem() {
   const title = document.getElementById('item-title').value.trim();
   if (!title) { alert('Please enter something to remember!'); return; }
-  const item = {
-    id: Date.now(),
-    type: currentType,
-    title,
+  items.unshift({
+    id: Date.now(), type: currentType, title,
     notes: document.getElementById('item-notes').value.trim(),
     date: document.getElementById('item-date').value,
     time: document.getElementById('item-time').value,
     preReminds: [...preReminds],
     forPartner: document.getElementById('item-partner-flag').checked,
-    done: false,
-    created: new Date().toISOString()
-  };
-  items.unshift(item);
-  save();
-  clearForm();
-  showTab('today');
-  showToast('✅ Saved! Don\'t worry, I\'ve got it!');
+    done: false, created: new Date().toISOString()
+  });
+  save(); clearForm(); showTab('today');
+  showToast("✅ Saved! Don't worry, I've got it!");
 }
 
 function clearForm() {
-  document.getElementById('item-title').value = '';
-  document.getElementById('item-notes').value = '';
-  document.getElementById('item-date').value = '';
-  document.getElementById('item-time').value = '';
+  ['item-title','item-notes','item-date','item-time','inline-contact-name'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   document.getElementById('item-partner-flag').checked = false;
   document.getElementById('send-contact-options').style.display = 'none';
   preReminds = [];
@@ -666,10 +604,12 @@ function clearForm() {
   selectType('note');
 }
 
+// ——— RENDER ———
 function renderAll() {
   renderAllItems();
   renderChecklist();
-  renderPartnerItems();
+  renderContactsSettings();
+  renderInlineQuickContacts();
   loadSettings();
 }
 
@@ -692,27 +632,43 @@ function getIcon(item) {
   return '📌';
 }
 
+function getNamedContacts() {
+  return settings.contacts.filter(c => c.name && c.name.trim());
+}
+
 function renderAllItems() {
   const el = document.getElementById('all-items-list');
   if (!items.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>';
     return;
   }
-  el.innerHTML = items.map(item => `
-    <div class="item-card type-${item.type} ${item.done ? 'done' : ''}" onclick="openModal(${item.id})">
+  const namedContacts = getNamedContacts();
+  el.innerHTML = items.map(item => {
+    let quickBtns = '';
+    if (item.forPartner && namedContacts.length) {
+      const msg = item.title + (item.notes ? '\n' + item.notes : '');
+      const btns = namedContacts.map(c => {
+        const mj = JSON.stringify(msg), nj = JSON.stringify(c.name), pj = JSON.stringify(c.phone);
+        return `<button class="quick-contact-btn" onclick="event.stopPropagation(); sendToContact(${nj},${pj},${mj})">📱 ${c.name}</button>`;
+      }).join('');
+      quickBtns = `<div class="quick-contacts"><div class="quick-contacts-label">Quick send to:</div><div class="quick-contact-btns">${btns}</div></div>`;
+    }
+    return `
+    <div class="item-card type-${item.type} ${item.done?'done':''}" onclick="openModal(${item.id})">
       <div class="item-icon">${getIcon(item)}</div>
       <div class="item-body">
         <div class="item-title">${item.title}</div>
-        ${item.notes ? `<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>` : ''}
-        ${item.date ? `<div class="item-meta">📅 ${formatDate(item.date)}${item.time ? ' at '+item.time : ''}</div>` : ''}
+        ${item.notes?`<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>`:''}
+        ${item.date?`<div class="item-meta">📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}</div>`:''}
         <div>
-          <span class="item-tag tag-${item.type}">${item.type === 'note' ? '📌 Note' : '⏰ Reminder'}</span>
-          ${item.forPartner ? '<span class="item-tag tag-partner" style="margin-left:4px;">💌 To share</span>' : ''}
-          ${item.done ? '<span class="item-tag" style="background:#e0f7e9;color:#2e7d52;margin-left:4px;">✅ Done</span>' : ''}
+          <span class="item-tag tag-${item.type}">${item.type==='note'?'📌 Note':'⏰ Reminder'}</span>
+          ${item.forPartner?'<span class="item-tag tag-partner" style="margin-left:4px;">💌 To share</span>':''}
+          ${item.done?'<span class="item-tag" style="background:#e0f7e9;color:#2e7d52;margin-left:4px;">✅ Done</span>':''}
         </div>
+        ${quickBtns}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderChecklist() {
@@ -720,217 +676,212 @@ function renderChecklist() {
   const reset = document.getElementById('checklist-reset');
   if (!items.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they\'ll appear here each evening!</p></div>';
-    reset.style.display = 'none';
-    return;
+    reset.style.display = 'none'; return;
   }
   const active = items.filter(i => !i.done);
   if (!active.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Everything is ticked off — great job!</p></div>';
-    reset.style.display = 'block';
-    return;
+    reset.style.display = 'block'; return;
   }
   reset.style.display = 'block';
   el.innerHTML = active.map(item => {
     const checked = checkedToday.includes(item.id);
     return `
     <div class="checklist-item">
-      <div class="check-circle ${checked ? 'checked' : ''}" onclick="toggleCheck(${item.id})">
-        ${checked ? '✓' : ''}
-      </div>
-      <label class="${checked ? 'checklist-done' : ''}" onclick="toggleCheck(${item.id})" style="cursor:pointer;">
+      <div class="check-circle ${checked?'checked':''}" onclick="toggleCheck(${item.id})">${checked?'✓':''}</div>
+      <label class="${checked?'checklist-done':''}" onclick="toggleCheck(${item.id})" style="cursor:pointer;flex:1;">
         ${getIcon(item)} <strong>${item.title}</strong>
-        ${item.date ? ` <span style="color:var(--muted);font-size:0.8rem;">(${formatDate(item.date)})</span>` : ''}
+        ${item.date?` <span style="color:var(--muted);font-size:0.8rem;">(${formatDate(item.date)})</span>`:''}
       </label>
     </div>`;
   }).join('');
 }
 
-function renderPartnerItems() {
-  const el = document.getElementById('partner-items-list');
+function renderContactsSettings() {
+  const el = document.getElementById('contacts-settings-list');
   if (!el) return;
-  const partner = items.filter(i => i.forPartner);
-  if (!partner.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">💛</div><p>Things flagged to share will appear here.</p></div>';
-    return;
-  }
-  el.innerHTML = partner.map(item => {
-    const msg = item.title + (item.notes ? '\n' + item.notes : '');
-    const msgJson = JSON.stringify(msg);
-    return `
-    <div class="item-card type-partner ${item.done ? 'done' : ''}">
-      <div class="item-icon">💌</div>
-      <div class="item-body">
-        <div class="item-title" onclick="openModal(${item.id})" style="cursor:pointer;">${item.title}</div>
-        ${item.notes ? `<div class="item-meta">${item.notes}</div>` : ''}
-        ${item.date ? `<div class="item-meta">📅 ${formatDate(item.date)}</div>` : ''}
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-          <button class="btn btn-partner btn-sm" onclick="sendWhatsApp('', ${msgJson})">📱 WhatsApp</button>
-          <button class="btn btn-secondary btn-sm" onclick="sendSMS('', ${msgJson})">💬 SMS</button>
-          <button class="btn btn-sm" style="background:#eee;" onclick="copyMessage('', ${msgJson})">📋 Copy</button>
-        </div>
+  el.innerHTML = settings.contacts.map((c, i) => `
+    <div class="contact-slot">
+      <div class="contact-slot-header">
+        <div class="contact-number">${i+1}</div>
+        <h3>${c.name ? '👤 ' + c.name : 'Contact ' + (i+1) + ' — empty'}</h3>
       </div>
-    </div>`;
-  }).join('');
+      <div class="contact-inputs">
+        <input type="text" id="contact-name-${i}" placeholder="Name (e.g. Mum)" value="${c.name||''}">
+        <input type="text" id="contact-phone-${i}" placeholder="+447911123456" value="${c.phone||''}">
+      </div>
+    </div>`).join('');
 }
 
+function renderInlineQuickContacts() {
+  const el = document.getElementById('inline-quick-contacts');
+  if (!el) return;
+  const named = getNamedContacts();
+  if (!named.length) {
+    el.innerHTML = '<span style="font-size:0.8rem;color:var(--muted);">💡 Add contacts in Settings for quick buttons</span>';
+    return;
+  }
+  el.innerHTML = named.map(c => `
+    <button class="quick-contact-btn" onclick="selectInlineContact('${c.name}')">👤 ${c.name}</button>
+  `).join('');
+}
+
+function selectInlineContact(name) {
+  document.getElementById('inline-contact-name').value = name;
+  document.querySelectorAll('#inline-quick-contacts .quick-contact-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.trim().endsWith(name));
+  });
+}
+
+// ——— CONTACTS SAVE ———
+function saveContacts() {
+  settings.contacts = settings.contacts.map((c, i) => ({
+    name: (document.getElementById(`contact-name-${i}`) || {}).value || '',
+    phone: (document.getElementById(`contact-phone-${i}`) || {}).value || ''
+  }));
+  settings.notifTime = document.getElementById('notif-time').value;
+  persistSettings();
+  showToast('💾 Contacts saved!');
+  renderAll();
+}
+
+function saveSettingsSilent() {
+  settings.notifTime = document.getElementById('notif-time').value;
+  persistSettings();
+}
+
+// ——— CHECKLIST ———
 function toggleCheck(id) {
-  if (checkedToday.includes(id)) checkedToday = checkedToday.filter(i => i !== id);
-  else checkedToday.push(id);
+  checkedToday = checkedToday.includes(id) ? checkedToday.filter(i => i !== id) : [...checkedToday, id];
   localStorage.setItem('df_checked', JSON.stringify(checkedToday));
   renderChecklist();
 }
-
 function resetChecklist() {
   checkedToday = [];
   localStorage.setItem('df_checked', JSON.stringify(checkedToday));
   renderChecklist();
 }
 
+// ——— MODAL ———
 function openModal(id) {
   const item = items.find(i => i.id === id);
   if (!item) return;
   document.getElementById('modal-title').textContent = getIcon(item) + ' ' + item.title;
   document.getElementById('modal-notes').textContent = item.notes || '(No extra details)';
   let meta = '';
-  if (item.date) meta += `📅 ${formatDate(item.date)}${item.time ? ' at '+item.time : ''}`;
-  if (item.preReminds && item.preReminds.length) meta += `  •  Pre-reminders: ${item.preReminds.join(', ')}`;
+  if (item.date) meta += `📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}`;
+  if (item.preReminds && item.preReminds.length) meta += `  •  Advance: ${item.preReminds.join(', ')}`;
   if (item.forPartner) meta += '  •  💌 Flagged to share';
   document.getElementById('modal-meta').textContent = meta;
   document.getElementById('modal-delete-btn').onclick = () => { deleteItem(id); closeModal(); };
   document.getElementById('modal-done-btn').onclick = () => { markDone(id); closeModal(); };
   document.getElementById('modal-done-btn').textContent = item.done ? '↩ Unmark Done' : '✅ Mark Done';
 
-  let sendBtns = document.getElementById('modal-send-btns');
-  if (!sendBtns) {
-    sendBtns = document.createElement('div');
-    sendBtns.id = 'modal-send-btns';
-    sendBtns.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:2px solid #f0e4d4;';
-    document.getElementById('modal-content').insertBefore(sendBtns, document.querySelector('.modal-actions'));
-  }
+  const sendBtns = document.getElementById('modal-send-btns');
   if (item.forPartner) {
     const msg = item.title + (item.notes ? '\n' + item.notes : '');
-    sendBtns.style.display = 'flex';
+    const named = getNamedContacts();
+    const contactBtns = named.map(c => {
+      const mj=JSON.stringify(msg), nj=JSON.stringify(c.name), pj=JSON.stringify(c.phone);
+      return `<button class="quick-contact-btn" onclick="sendToContact(${nj},${pj},${mj})">📱 ${c.name}</button>`;
+    }).join('');
     sendBtns.innerHTML = `
-      <div style="width:100%;font-weight:800;font-size:0.85rem;color:var(--muted);margin-bottom:4px;">📲 SEND THIS TO SOMEONE:</div>
-      <button class="btn btn-partner btn-sm" onclick="sendWhatsApp('', ${JSON.stringify(msg)})">📱 WhatsApp</button>
-      <button class="btn btn-secondary btn-sm" onclick="sendSMS('', ${JSON.stringify(msg)})">💬 SMS</button>
-      <button class="btn btn-sm" style="background:#eee;" onclick="copyMessage('', ${JSON.stringify(msg)})">📋 Copy</button>`;
+      <div style="background:#fffbea;border:2px solid var(--accent2);border-radius:12px;padding:12px;margin-bottom:12px;">
+        <div style="font-weight:800;font-size:0.82rem;color:var(--muted);margin-bottom:8px;">📲 QUICK SEND TO:</div>
+        ${named.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">${contactBtns}</div>` : '<p style="font-size:0.82rem;color:var(--muted);margin-bottom:8px;">Add contacts in Settings for quick buttons</p>'}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-partner btn-sm" onclick="sendToContact('','',${JSON.stringify(msg)})">📱 WhatsApp (choose contact)</button>
+          <button class="btn btn-sm" style="background:#eee;" onclick="copyText(${JSON.stringify(msg)})">📋 Copy</button>
+        </div>
+      </div>`;
   } else {
-    sendBtns.style.display = 'none';
     sendBtns.innerHTML = '';
   }
   document.getElementById('modal').classList.add('open');
 }
 
 function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal')) {
+  if (!e || e.target === document.getElementById('modal'))
     document.getElementById('modal').classList.remove('open');
-  }
 }
-function deleteItem(id) {
-  items = items.filter(i => i.id !== id);
-  save();
-  renderAll();
-}
+function deleteItem(id) { items = items.filter(i => i.id !== id); save(); renderAll(); closeModal(); }
 function markDone(id) {
   const item = items.find(i => i.id === id);
   if (item) item.done = !item.done;
-  save();
-  renderAll();
+  save(); renderAll();
 }
 
-function getPhone() {
-  return settings.partnerPhone || '';
-}
-
+// ——— MESSAGING ———
 function buildWhatsAppUrl(phone, message) {
-  const cleaned = phone.replace(/[\s\-().]/g, '');
+  const cleaned = (phone||'').replace(/[\s\-().]/g,'');
   const encoded = encodeURIComponent(message);
   return cleaned ? `https://wa.me/${cleaned}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
 }
 
-function getFullMessage(nameOverride, msgOverride) {
-  const name = nameOverride || '';
-  const msg = msgOverride || '';
-  return `${name ? name + ', ' : ''}${msg}\n\n— Sent via Don't Forget! 🧠`;
+function sendToContact(name, phone, message) {
+  const fullMsg = `${name?name+', ':''}${message}\n\n— Sent via Don't Forget! 🧠`;
+  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
 }
 
-function sendWhatsApp(nameOverride, msgOverride) {
-  const msg = getFullMessage(nameOverride, msgOverride);
-  if (!msgOverride && !msg.trim()) { alert('Please write a message first!'); return; }
-  window.open(buildWhatsAppUrl(getPhone(), msg), '_blank');
+function copyText(message) {
+  navigator.clipboard.writeText(message + "\n\n— Sent via Don't Forget! 🧠")
+    .then(() => showToast('📋 Copied!'));
 }
 
-function sendSMS(nameOverride, msgOverride) {
-  const phone = getPhone();
-  const msg = encodeURIComponent(getFullMessage(nameOverride, msgOverride));
-  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
-  window.location.href = `sms:${phone}${sep}body=${msg}`;
-}
-
-function copyMessage(nameOverride, msgOverride) {
-  const msg = getFullMessage(nameOverride, msgOverride);
-  navigator.clipboard.writeText(msg).then(() => showToast('📋 Copied to clipboard!'));
-}
-
-function getNoteMessage() {
-  const title = document.getElementById('item-title').value || '';
-  const notes = document.getElementById('item-notes').value || '';
+function getNoteDetails() {
   const name = document.getElementById('inline-contact-name').value || '';
-  return { name, text: title + (notes ? '\n' + notes : '') };
+  const contact = settings.contacts.find(c => c.name === name) || {};
+  return {
+    name,
+    phone: contact.phone || '',
+    text: (document.getElementById('item-title').value||'') + ((document.getElementById('item-notes').value||'') ? '\n'+(document.getElementById('item-notes').value) : '')
+  };
 }
 
 function sendNoteWhatsApp() {
-  const { name, text } = getNoteMessage();
+  const { name, phone, text } = getNoteDetails();
   if (!text.trim()) { alert('Please enter something to remember first!'); return; }
-  const fullMsg = `${name ? name + ', ' : ''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
-  window.open(buildWhatsAppUrl(getPhone(), fullMsg), '_blank');
+  const fullMsg = `${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
+  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
 }
 
 function sendNoteSMS() {
-  const { name, text } = getNoteMessage();
+  const { name, phone, text } = getNoteDetails();
   if (!text.trim()) { alert('Please enter something to remember first!'); return; }
-  const fullMsg = encodeURIComponent(`${name ? name + ', ' : ''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`);
+  const fullMsg = encodeURIComponent(`${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`);
   const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
-  window.location.href = `sms:${getPhone()}${sep}body=${fullMsg}`;
+  window.location.href = `sms:${phone}${sep}body=${fullMsg}`;
 }
 
 function copyNoteMessage() {
-  const { name, text } = getNoteMessage();
-  const fullMsg = `${name ? name + ', ' : ''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
+  const { name, text } = getNoteDetails();
+  const fullMsg = `${name?name+', ':''}Just a heads up — don't forget: ${text}\n\n— Sent via Don't Forget! 🧠`;
   navigator.clipboard.writeText(fullMsg).then(() => showToast('📋 Copied!'));
 }
 
+// ——— NOTIFICATIONS ———
 function toggleNotifications() {
   const enabled = document.getElementById('notif-toggle').checked;
   if (enabled) {
     Notification.requestPermission().then(perm => {
       if (perm === 'granted') {
-        settings.notifEnabled = true;
-        saveSettings();
-        scheduleNotification();
-        showToast('🔔 Evening reminder enabled!');
+        settings.notifEnabled = true; persistSettings();
+        scheduleNotification(); showToast('🔔 Evening reminder enabled!');
       } else {
         document.getElementById('notif-toggle').checked = false;
         alert('Please allow notifications in your browser settings.');
       }
     });
   } else {
-    settings.notifEnabled = false;
-    saveSettings();
+    settings.notifEnabled = false; persistSettings();
     if (notifInterval) { clearInterval(notifInterval); notifInterval = null; }
   }
 }
 
 function testNotification() {
   if (Notification.permission !== 'granted') {
-    Notification.requestPermission().then(perm => {
-      if (perm === 'granted') fireNotification();
-      else alert('Please allow notifications first!');
-    });
-  } else {
-    fireNotification();
-  }
+    Notification.requestPermission().then(p => { if (p==='granted') fireNotification(); else alert('Please allow notifications first!'); });
+  } else fireNotification();
 }
 
 function fireNotification() {
@@ -945,14 +896,14 @@ function scheduleNotification() {
   if (notifInterval) clearInterval(notifInterval);
   notifInterval = setInterval(() => {
     const now = new Date();
-    const [h, m] = settings.notifTime.split(':').map(Number);
-    if (now.getHours() === h && now.getMinutes() === m && now.getSeconds() < 30) {
-      if (settings.notifEnabled && Notification.permission === 'granted') {
+    const [h,m] = settings.notifTime.split(':').map(Number);
+    if (now.getHours()===h && now.getMinutes()===m && now.getSeconds()<30) {
+      if (settings.notifEnabled && Notification.permission==='granted') {
         fireNotification();
         const bar = document.getElementById('notifBar');
-        document.getElementById('notifCount').textContent = items.filter(i => !i.done).length;
+        document.getElementById('notifCount').textContent = items.filter(i=>!i.done).length;
         bar.style.display = 'block';
-        setTimeout(() => bar.style.display = 'none', 10000);
+        setTimeout(() => bar.style.display='none', 10000);
       }
     }
   }, 20000);
@@ -960,24 +911,20 @@ function scheduleNotification() {
 
 function loadSettings() {
   document.getElementById('notif-time').value = settings.notifTime || '19:00';
-  document.getElementById('settings-partner-name').value = settings.partnerName || '';
-  document.getElementById('settings-partner-phone').value = settings.partnerPhone || '';
   document.getElementById('notif-toggle').checked = settings.notifEnabled || false;
 }
 
+// ——— CLEAR ———
 function clearDone() {
   if (!confirm('Remove all done items?')) return;
-  items = items.filter(i => !i.done);
-  save(); renderAll();
-  showToast('🗑 Done items cleared!');
+  items = items.filter(i => !i.done); save(); renderAll(); showToast('🗑 Done items cleared!');
 }
 function clearAll() {
   if (!confirm('Clear ALL items? This cannot be undone!')) return;
-  items = [];
-  save(); renderAll();
-  showToast('🗑 Everything cleared!');
+  items = []; save(); renderAll(); showToast('🗑 Everything cleared!');
 }
 
+// ——— TOAST ———
 function showToast(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
@@ -989,18 +936,67 @@ function showToast(msg) {
     whiteSpace:'nowrap'
   });
   document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2500);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const flag = document.getElementById('item-partner-flag');
-  if (flag) {
-    flag.addEventListener('change', () => {
-      document.getElementById('send-contact-options').style.display = flag.checked ? 'block' : 'none';
-    });
+// ——— PWA INSTALL ———
+function isIos() { return /iP(hone|ad|od)/.test(navigator.userAgent); }
+function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
+
+function handleInstallClick() {
+  if (isIos()) {
+    document.getElementById('iosModal').classList.add('open');
+  } else if (deferredInstallPrompt) {
+    triggerInstall();
+  } else {
+    alert('To install: open your browser menu and look for "Install app" or "Add to Home Screen".');
   }
+}
+
+function triggerInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') showToast('🎉 App installed! Find it on your home screen.');
+    deferredInstallPrompt = null;
+    document.getElementById('installBanner').style.display = 'none';
+    document.getElementById('installHeaderBtn').classList.add('hidden');
+  });
+}
+
+function dismissBanner() {
+  document.getElementById('installBanner').style.display = 'none';
+  localStorage.setItem('df_banner_dismissed','1');
+}
+
+function closeIosModal() { document.getElementById('iosModal').classList.remove('open'); }
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!isStandalone() && !localStorage.getItem('df_banner_dismissed'))
+    document.getElementById('installBanner').style.display = 'block';
+  document.getElementById('installHeaderBtn').classList.remove('hidden');
 });
 
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+  document.getElementById('installHeaderBtn').classList.add('hidden');
+  deferredInstallPrompt = null;
+});
+
+if (isIos() && !isStandalone())
+  document.getElementById('installHeaderBtn').classList.remove('hidden');
+
+// ——— CHECKBOX TOGGLE ———
+document.addEventListener('DOMContentLoaded', () => {
+  const flag = document.getElementById('item-partner-flag');
+  if (flag) flag.addEventListener('change', () => {
+    document.getElementById('send-contact-options').style.display = flag.checked ? 'block' : 'none';
+  });
+});
+
+// ——— INIT ———
 renderAll();
 if (settings.notifEnabled) scheduleNotification();
 </script>
