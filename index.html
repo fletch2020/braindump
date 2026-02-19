@@ -496,7 +496,8 @@
       <h2>👥 Your 5 Quick Contacts</h2>
       <p style="color:var(--muted); font-size:0.85rem; margin-bottom:16px;">Save up to 5 people you message regularly. Their names appear as quick-tap buttons whenever you flag something to share — no typing needed!</p>
       <div id="contacts-settings-list"></div>
-      <button class="btn btn-primary btn-sm" onclick="saveContacts()" style="margin-top:4px;">💾 Save Contacts</button>
+      <p style="font-size:0.78rem; color:var(--muted); margin-top:10px;">💡 <strong>Phone format:</strong> Either 07911123456 or +447911123456 both work fine!</p>
+      <button class="btn btn-primary btn-sm" onclick="saveContacts()" style="margin-top:8px;">💾 Save Contacts</button>
     </div>
 
     <div class="card">
@@ -708,7 +709,7 @@ function renderContactsSettings() {
       </div>
       <div class="contact-inputs">
         <input type="text" id="contact-name-${i}" placeholder="Name (e.g. Mum)" value="${c.name||''}">
-        <input type="text" id="contact-phone-${i}" placeholder="+447911123456" value="${c.phone||''}">
+        <input type="text" id="contact-phone-${i}" placeholder="07911123456 or +447911123456" value="${c.phone||''}">
       </div>
     </div>`).join('');
 }
@@ -813,7 +814,10 @@ function markDone(id) {
 
 // ——— MESSAGING ———
 function buildWhatsAppUrl(phone, message) {
-  const cleaned = (phone||'').replace(/[\s\-().]/g,'');
+  // Strip ALL non-digit characters — wa.me needs pure digits only e.g. 447911123456
+  let cleaned = (phone||'').replace(/[^0-9]/g, '');
+  // Auto-convert UK local 07xxx to international 447xxx
+  if (cleaned.startsWith('0')) cleaned = '44' + cleaned.slice(1);
   const encoded = encodeURIComponent(message);
   return cleaned ? `https://wa.me/${cleaned}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
 }
