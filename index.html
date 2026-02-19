@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Don't Forget! 🧠</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fef6e9;
+    --card: #fff8f0;
+    --accent1: #ff6b6b;
+    --accent2: #ffd166;
+    --accent3: #06d6a0;
+    --accent4: #118ab2;
+    --text: #2d2d2d;
+    --muted: #9b8ea0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 20% 20%, #ffe8d6 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, #d4f5e9 0%, transparent 50%);
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 20px 16px;
+  }
+  header h1 {
+    font-family: 'Caveat', cursive;
+    font-size: 3rem;
+    color: var(--accent1);
+    line-height: 1;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 6px;
+  }
+
+  .notification-bar {
+    background: var(--accent3);
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid #04b589;
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 20px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 22px;
+    border: 3px solid transparent;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    color: var(--muted);
+    box-shadow: var(--shadow);
+  }
+  .tab-btn.active { background: var(--accent1); color: white; border-color: var(--accent1); }
+  .tab-btn:hover:not(.active) { border-color: var(--accent1); color: var(--accent1); }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 2px solid #f0e4d4;
+  }
+  .card h2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* INPUTS */
+  input[type="text"], input[type="date"], input[type="time"], textarea, select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e8ddd4;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    background: white;
+    color: var(--text);
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent1); }
+  textarea { min-height: 80px; resize: vertical; }
+
+  label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-group { margin-bottom: 4px; }
+
+  .row { display: flex; gap: 12px; }
+  .row .form-group { flex: 1; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 13px 28px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary { background: var(--accent1); color: white; }
+  .btn-primary:hover { background: #e55555; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,107,0.3); }
+  .btn-secondary { background: var(--accent4); color: white; }
+  .btn-secondary:hover { background: #0d7a9e; transform: translateY(-1px); }
+  .btn-partner { background: var(--accent2); color: #2d2d2d; }
+  .btn-partner:hover { background: #f5c800; transform: translateY(-1px); }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+  .btn-danger { background: #ffe5e5; color: var(--accent1); }
+  .btn-danger:hover { background: var(--accent1); color: white; }
+
+  /* REMINDER ITEMS */
+  .items-list { display: flex; flex-direction: column; gap: 12px; }
+  .item-card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px 18px;
+    border: 2px solid #f0e4d4;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .item-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+  }
+  .item-card.type-note::before { background: var(--accent4); }
+  .item-card.type-reminder::before { background: var(--accent1); }
+  .item-card.type-partner::before { background: var(--accent2); }
+  .item-card.done { opacity: 0.5; }
+  .item-card.done .item-title { text-decoration: line-through; }
+
+  .item-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-weight: 700; font-size: 1rem; margin-bottom: 3px; }
+  .item-meta { font-size: 0.8rem; color: var(--muted); }
+  .item-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tag-note { background: #dff0fb; color: var(--accent4); }
+  .tag-reminder { background: #ffe5e5; color: var(--accent1); }
+  .tag-partner { background: #fff3cc; color: #b8860b; }
+  .tag-urgent { background: #ffe5e5; color: var(--accent1); animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+  /* NOTIFY SETTINGS */
+  .notify-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 2px solid #f0e4d4;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+  }
+  .notify-row .info { flex: 1; }
+  .notify-row .info strong { display: block; font-size: 0.95rem; }
+  .notify-row .info small { color: var(--muted); font-size: 0.82rem; }
+
+  /* TOGGLE */
+  .toggle {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #ddd;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent3); }
+  .toggle input:checked + .toggle-track::after { transform: translateX(24px); }
+
+  /* CHECKBOX */
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-item input { display: none; }
+  .checkbox-box {
+    width: 20px; height: 20px;
+    border: 2px solid #e8ddd4;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .checkbox-item input:checked + .checkbox-box {
+    background: var(--accent3);
+    border-color: var(--accent3);
+  }
+  .checkbox-item input:checked + .checkbox-box::after { content: '✓'; color: white; font-size: 12px; font-weight: 900; }
+
+  /* TONIGHT CHECKLIST */
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0e4d4;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item label { cursor: pointer; flex: 1; font-weight: 600; }
+  .checklist-done { text-decoration: line-through; color: var(--muted); }
+
+  /* PARTNER SEND */
+  .partner-preview {
+    background: linear-gradient(135deg, #fff3cc, #ffe8a0);
+    border: 2px dashed var(--accent2);
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    display: none;
+  }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty p { font-size: 0.95rem; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal h3 { font-size: 1.3rem; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* REMINDER TYPE PICKER */
+  .type-picker {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .type-option {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e8ddd4;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .type-option.selected { border-color: var(--accent1); background: #fff0f0; color: var(--accent1); }
+  .type-option .type-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+
+  .reminder-options { display: none; }
+  .reminder-options.show { display: block; }
+
+  .pre-remind-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .pre-remind-btn {
+    padding: 8px 14px;
+    border: 2px solid #e8ddd4;
+    border-radius: 50px;
+    background: white;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+  .pre-remind-btn.selected { border-color: var(--accent4); background: #dff0fb; color: var(--accent4); }
+
+  .section-title {
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .daily-count {
+    display: inline-block;
+    background: var(--accent1);
+    color: white;
+    border-radius: 50px;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    vertical-align: middle;
+  }
+
+  .badge {
+    background: var(--accent1);
+    color: white;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="notification-bar" id="notifBar">
+  🔔 Daily reminder: Check your list! You have <span id="notifCount">0</span> things to review tonight.
+</div>
+
+<header>
+  <h1>🧠 Don't Forget!</h1>
+  <p>Your friendly memory helper — for those of us who need a little nudge!</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('today')">📋 Today's List</button>
+  <button class="tab-btn" onclick="showTab('add')">➕ Add Thing</button>
+  <button class="tab-btn" onclick="showTab('partner')">💌 Tell Partner</button>
+  <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
+</div>
+
+<div class="container">
+
+  <!-- TODAY'S LIST -->
+  <div class="panel active" id="panel-today">
+    <div class="section-title">Tonight's Checklist ✅</div>
+    <div class="card">
+      <div id="checklist-container">
+        <div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they'll appear here each evening for you to tick off!</p></div>
+      </div>
+      <div id="checklist-reset" style="display:none; margin-top:12px;">
+        <button class="btn btn-secondary btn-sm" onclick="resetChecklist()">↺ Reset Ticks</button>
+      </div>
+    </div>
+
+    <div class="section-title">All My Things</div>
+    <div id="all-items-list" class="items-list">
+      <div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>
+    </div>
+  </div>
+
+  <!-- ADD THING -->
+  <div class="panel" id="panel-add">
+    <div class="section-title">Add Something ✏️</div>
+    <div class="card">
+      <h2>📝 What type of thing is this?</h2>
+      <div class="type-picker">
+        <div class="type-option selected" onclick="selectType('note')" id="type-note">
+          <span class="type-icon">📌</span>Note / Info
+        </div>
+        <div class="type-option" onclick="selectType('reminder')" id="type-reminder">
+          <span class="type-icon">📅</span>Reminder
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>What do you need to remember?</label>
+        <input type="text" id="item-title" placeholder="e.g. We're out for tea on Friday!">
+      </div>
+
+      <div class="form-group">
+        <label>Any extra details? (optional)</label>
+        <textarea id="item-notes" placeholder="Any extra info..."></textarea>
+      </div>
+
+      <!-- Reminder options -->
+      <div class="reminder-options" id="reminder-options">
+        <div class="form-group">
+          <label>Date of the event</label>
+          <input type="date" id="item-date">
+        </div>
+        <div class="form-group">
+          <label>Time of the event (optional)</label>
+          <input type="time" id="item-time">
+        </div>
+        <div>
+          <label>Also remind me in advance?</label>
+          <div class="pre-remind-options">
+            <button class="pre-remind-btn" onclick="togglePreRemind(this, '1day')">1 Day before</button>
+            <button class="pre-remind-btn" onclick="togglePreRemind(this, '2days')">2 Days before</button>
+            <button class="pre-remind-btn" onclick="togglePreRemind(this, '1week')">1 Week before</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 8px;">
+        <label class="checkbox-item">
+          <input type="checkbox" id="item-partner-flag">
+          <span class="checkbox-box"></span>
+          <span style="font-weight:700; font-size:0.9rem;">💌 My partner also needs to know this</span>
+        </label>
+      </div>
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveItem()">💾 Save it!</button>
+        <button class="btn btn-secondary" onclick="clearForm()">🗑 Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELL PARTNER -->
+  <div class="panel" id="panel-partner">
+    <div class="section-title">Tell Your Partner 💌</div>
+    <div class="card">
+      <h2>🚨 Quick "Need to Tell You" Message</h2>
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:16px;">Fire this off before you forget! Compose a quick message to your partner.</p>
+
+      <div class="form-group">
+        <label>Your partner's name</label>
+        <input type="text" id="partner-name" placeholder="e.g. Sarah" oninput="updatePreview()">
+      </div>
+
+      <div class="form-group">
+        <label>Your message</label>
+        <textarea id="partner-message" placeholder="Hey! Don't let me forget — we're out for tea on Friday at 7pm at Luigi's!" oninput="updatePreview()"></textarea>
+      </div>
+
+      <div class="partner-preview" id="partner-preview"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-partner" onclick="sendWhatsApp()">📱 Send via WhatsApp</button>
+        <button class="btn btn-secondary" onclick="sendSMS()">💬 Send via SMS</button>
+        <button class="btn btn-primary" onclick="copyMessage()">📋 Copy Message</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;">Partner Items 📌</div>
+    <div id="partner-items-list" class="items-list">
+      <div class="empty"><div class="empty-icon">💛</div><p>Things you've flagged for your partner will appear here.</p></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div class="section-title">Settings ⚙️</div>
+
+    <div class="card">
+      <h2>🔔 Evening Reminder</h2>
+      <p style="color:var(--muted); font-size:0.88rem; margin-bottom:16px;">Get a browser notification each evening to check your list. You'll need to allow notifications when prompted.</p>
+
+      <div class="notify-row">
+        <div class="info">
+          <strong>Enable Evening Reminder</strong>
+          <small>Reminds you to check your list</small>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notif-toggle" onchange="toggleNotifications()">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Reminder time</label>
+        <input type="time" id="notif-time" value="19:00" onchange="saveSettings()">
+      </div>
+
+      <button class="btn btn-secondary btn-sm" onclick="testNotification()">🔔 Test Notification Now</button>
+    </div>
+
+    <div class="card">
+      <h2>👤 Partner Settings</h2>
+      <div class="form-group">
+        <label>Partner's name (for messages)</label>
+        <input type="text" id="settings-partner-name" placeholder="e.g. Sarah" oninput="saveSettings()">
+      </div>
+      <div class="form-group">
+        <label>Partner's phone number (for SMS/WhatsApp)</label>
+        <input type="text" id="settings-partner-phone" placeholder="e.g. +447911123456" oninput="saveSettings()">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🗑 Manage Data</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-danger btn-sm" onclick="clearDone()">Remove Done Items</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear Everything</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL for item view -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <h3 id="modal-title"></h3>
+    <p id="modal-notes" style="color:var(--muted); margin-bottom:12px; font-size:0.9rem;"></p>
+    <div id="modal-meta" style="font-size:0.85rem; color: var(--accent4); font-weight:700; margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="modal-delete-btn">🗑 Delete</button>
+      <button class="btn btn-primary btn-sm" id="modal-done-btn">✅ Mark Done</button>
+      <button class="btn btn-sm" onclick="closeModal()" style="background:#eee;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ——— DATA ———
+let items = JSON.parse(localStorage.getItem('df_items') || '[]');
+let settings = JSON.parse(localStorage.getItem('df_settings') || '{"notifTime":"19:00","partnerName":"","partnerPhone":"","notifEnabled":false}');
+let checkedToday = JSON.parse(localStorage.getItem('df_checked') || '[]');
+let currentType = 'note';
+let preReminds = [];
+let notifInterval = null;
+
+function save() {
+  localStorage.setItem('df_items', JSON.stringify(items));
+}
+function saveSettings() {
+  settings.notifTime = document.getElementById('notif-time').value;
+  settings.partnerName = document.getElementById('settings-partner-name').value;
+  settings.partnerPhone = document.getElementById('settings-partner-phone').value;
+  localStorage.setItem('df_settings', JSON.stringify(settings));
+  // sync partner name to partner tab
+  document.getElementById('partner-name').value = settings.partnerName;
+}
+
+// ——— TABS ———
+function showTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+// ——— TYPE PICKER ———
+function selectType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('type-' + type).classList.add('selected');
+  const ro = document.getElementById('reminder-options');
+  if (type === 'reminder') ro.classList.add('show');
+  else ro.classList.remove('show');
+}
+
+function togglePreRemind(btn, val) {
+  btn.classList.toggle('selected');
+  if (preReminds.includes(val)) preReminds = preReminds.filter(v => v !== val);
+  else preReminds.push(val);
+}
+
+// ——— SAVE ITEM ———
+function saveItem() {
+  const title = document.getElementById('item-title').value.trim();
+  if (!title) { alert('Please enter something to remember!'); return; }
+
+  const item = {
+    id: Date.now(),
+    type: currentType,
+    title,
+    notes: document.getElementById('item-notes').value.trim(),
+    date: document.getElementById('item-date').value,
+    time: document.getElementById('item-time').value,
+    preReminds: [...preReminds],
+    forPartner: document.getElementById('item-partner-flag').checked,
+    done: false,
+    created: new Date().toISOString()
+  };
+
+  items.unshift(item);
+  save();
+  clearForm();
+  showTab('today');
+  showToast('✅ Saved! Don\'t worry, I\'ve got it!');
+}
+
+function clearForm() {
+  document.getElementById('item-title').value = '';
+  document.getElementById('item-notes').value = '';
+  document.getElementById('item-date').value = '';
+  document.getElementById('item-time').value = '';
+  document.getElementById('item-partner-flag').checked = false;
+  preReminds = [];
+  document.querySelectorAll('.pre-remind-btn').forEach(b => b.classList.remove('selected'));
+  selectType('note');
+}
+
+// ——— RENDER ———
+function renderAll() {
+  renderAllItems();
+  renderChecklist();
+  renderPartnerItems();
+  loadSettings();
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const date = new Date(d + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((date - today) / 86400000);
+  const base = date.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+  if (diff === 0) return `Today — ${base}`;
+  if (diff === 1) return `Tomorrow — ${base}`;
+  if (diff < 0) return `${Math.abs(diff)} days ago — ${base}`;
+  if (diff <= 7) return `In ${diff} days — ${base}`;
+  return base;
+}
+
+function getIcon(item) {
+  if (item.type === 'reminder') return '📅';
+  if (item.forPartner) return '💌';
+  return '📌';
+}
+
+function renderAllItems() {
+  const el = document.getElementById('all-items-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(item => `
+    <div class="item-card type-${item.type} ${item.done ? 'done' : ''}" onclick="openModal(${item.id})">
+      <div class="item-icon">${getIcon(item)}</div>
+      <div class="item-body">
+        <div class="item-title">${item.title}</div>
+        ${item.notes ? `<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>` : ''}
+        ${item.date ? `<div class="item-meta">📅 ${formatDate(item.date)}${item.time ? ' at '+item.time : ''}</div>` : ''}
+        <div>
+          <span class="item-tag tag-${item.type}">${item.type === 'note' ? '📌 Note' : '⏰ Reminder'}</span>
+          ${item.forPartner ? '<span class="item-tag tag-partner" style="margin-left:4px;">💌 Partner</span>' : ''}
+          ${item.done ? '<span class="item-tag" style="background:#e0f7e9;color:#2e7d52;margin-left:4px;">✅ Done</span>' : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderChecklist() {
+  const el = document.getElementById('checklist-container');
+  const reset = document.getElementById('checklist-reset');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they\'ll appear here each evening!</p></div>';
+    reset.style.display = 'none';
+    return;
+  }
+  const active = items.filter(i => !i.done);
+  if (!active.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Everything is ticked off — great job!</p></div>';
+    reset.style.display = 'block';
+    return;
+  }
+  reset.style.display = 'block';
+  el.innerHTML = active.map(item => {
+    const checked = checkedToday.includes(item.id);
+    return `
+    <div class="checklist-item">
+      <label class="toggle" style="width:36px;height:20px;">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCheck(${item.id}, this)">
+        <span class="toggle-track"></span>
+      </label>
+      <label class="${checked ? 'checklist-done' : ''}" onclick="toggleCheck(${item.id})">
+        ${getIcon(item)} <strong>${item.title}</strong>
+        ${item.date ? ` <span style="color:var(--muted);font-size:0.8rem;">(${formatDate(item.date)})</span>` : ''}
+      </label>
+    </div>`;
+  }).join('');
+}
+
+function renderPartnerItems() {
+  const el = document.getElementById('partner-items-list');
+  const partner = items.filter(i => i.forPartner);
+  if (!partner.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">💛</div><p>Things flagged for your partner will appear here.</p></div>';
+    return;
+  }
+  el.innerHTML = partner.map(item => `
+    <div class="item-card type-partner ${item.done ? 'done' : ''}" onclick="openModal(${item.id})">
+      <div class="item-icon">💌</div>
+      <div class="item-body">
+        <div class="item-title">${item.title}</div>
+        ${item.notes ? `<div class="item-meta">${item.notes}</div>` : ''}
+        ${item.date ? `<div class="item-meta">📅 ${formatDate(item.date)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ——— CHECKLIST ———
+function toggleCheck(id, checkbox) {
+  if (checkedToday.includes(id)) checkedToday = checkedToday.filter(i => i !== id);
+  else checkedToday.push(id);
+  localStorage.setItem('df_checked', JSON.stringify(checkedToday));
+  renderChecklist();
+}
+
+function resetChecklist() {
+  checkedToday = [];
+  localStorage.setItem('df_checked', JSON.stringify(checkedToday));
+  renderChecklist();
+}
+
+// ——— MODAL ———
+function openModal(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('modal-title').textContent = getIcon(item) + ' ' + item.title;
+  document.getElementById('modal-notes').textContent = item.notes || '(No extra details)';
+  let meta = '';
+  if (item.date) meta += `📅 ${formatDate(item.date)}${item.time ? ' at '+item.time : ''}`;
+  if (item.preReminds && item.preReminds.length) meta += `  •  Pre-reminders: ${item.preReminds.join(', ')}`;
+  if (item.forPartner) meta += '  •  💌 For partner';
+  document.getElementById('modal-meta').textContent = meta;
+  document.getElementById('modal-delete-btn').onclick = () => { deleteItem(id); closeModal(); };
+  document.getElementById('modal-done-btn').onclick = () => { markDone(id); closeModal(); };
+  document.getElementById('modal-done-btn').textContent = item.done ? '↩ Unmark Done' : '✅ Mark Done';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+function deleteItem(id) {
+  items = items.filter(i => i.id !== id);
+  save();
+  renderAll();
+}
+function markDone(id) {
+  const item = items.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  save();
+  renderAll();
+}
+
+// ——— PARTNER MESSAGING ———
+function updatePreview() {
+  const name = document.getElementById('partner-name').value || 'Hey';
+  const msg = document.getElementById('partner-message').value;
+  const preview = document.getElementById('partner-preview');
+  if (msg) {
+    preview.style.display = 'block';
+    preview.innerHTML = `<strong>${name},</strong><br>${msg}<br><br><em style="font-size:0.9rem; color: var(--muted);">— Sent via Don't Forget! 🧠</em>`;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function getFullMessage() {
+  const name = document.getElementById('partner-name').value || settings.partnerName || '';
+  const msg = document.getElementById('partner-message').value;
+  return `${name ? name + ', ' : ''}${msg}\n\n— Sent via Don't Forget! 🧠`;
+}
+
+function sendWhatsApp() {
+  const phone = settings.partnerPhone.replace(/\D/g, '');
+  const msg = encodeURIComponent(getFullMessage());
+  if (!msg) { alert('Please write a message first!'); return; }
+  const url = phone ? `https://wa.me/${phone}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  window.open(url, '_blank');
+}
+
+function sendSMS() {
+  const phone = settings.partnerPhone;
+  const msg = encodeURIComponent(getFullMessage());
+  if (!msg) { alert('Please write a message first!'); return; }
+  window.location.href = `sms:${phone}?body=${msg}`;
+}
+
+function copyMessage() {
+  const msg = getFullMessage();
+  if (!msg.trim()) { alert('Please write a message first!'); return; }
+  navigator.clipboard.writeText(msg).then(() => showToast('📋 Copied to clipboard!'));
+}
+
+// ——— NOTIFICATIONS ———
+function toggleNotifications() {
+  const enabled = document.getElementById('notif-toggle').checked;
+  if (enabled) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        settings.notifEnabled = true;
+        saveSettings();
+        scheduleNotification();
+        showToast('🔔 Evening reminder enabled!');
+      } else {
+        document.getElementById('notif-toggle').checked = false;
+        alert('Please allow notifications in your browser settings to use this feature.');
+      }
+    });
+  } else {
+    settings.notifEnabled = false;
+    saveSettings();
+    if (notifInterval) { clearInterval(notifInterval); notifInterval = null; }
+  }
+}
+
+function testNotification() {
+  if (Notification.permission !== 'granted') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') fireNotification();
+      else alert('Please allow notifications first!');
+    });
+  } else {
+    fireNotification();
+  }
+}
+
+function fireNotification() {
+  const count = items.filter(i => !i.done).length;
+  new Notification("🧠 Don't Forget!", {
+    body: `You have ${count} thing${count!==1?'s':''} on your list. Time for a quick check!`,
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧠</text></svg>'
+  });
+}
+
+function scheduleNotification() {
+  if (notifInterval) clearInterval(notifInterval);
+  notifInterval = setInterval(() => {
+    const now = new Date();
+    const [h, m] = settings.notifTime.split(':').map(Number);
+    if (now.getHours() === h && now.getMinutes() === m && now.getSeconds() < 30) {
+      if (settings.notifEnabled && Notification.permission === 'granted') {
+        fireNotification();
+        // also show in-app bar
+        const bar = document.getElementById('notifBar');
+        const count = items.filter(i => !i.done).length;
+        document.getElementById('notifCount').textContent = count;
+        bar.style.display = 'block';
+        setTimeout(() => bar.style.display = 'none', 10000);
+      }
+    }
+  }, 20000); // check every 20s
+}
+
+// ——— SETTINGS LOAD ———
+function loadSettings() {
+  document.getElementById('notif-time').value = settings.notifTime || '19:00';
+  document.getElementById('settings-partner-name').value = settings.partnerName || '';
+  document.getElementById('settings-partner-phone').value = settings.partnerPhone || '';
+  document.getElementById('notif-toggle').checked = settings.notifEnabled || false;
+  if (settings.partnerName) document.getElementById('partner-name').value = settings.partnerName;
+}
+
+// ——— CLEAR ———
+function clearDone() {
+  if (!confirm('Remove all done items?')) return;
+  items = items.filter(i => !i.done);
+  save();
+  renderAll();
+  showToast('🗑 Done items cleared!');
+}
+function clearAll() {
+  if (!confirm('Clear ALL items? This cannot be undone!')) return;
+  items = [];
+  save();
+  renderAll();
+  showToast('🗑 Everything cleared!');
+}
+
+// ——— TOAST ———
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'30px', left:'50%', transform:'translateX(-50%)',
+    background:'#2d2d2d', color:'white', padding:'12px 24px', borderRadius:'50px',
+    fontFamily:'Nunito,sans-serif', fontWeight:'700', fontSize:'0.9rem',
+    zIndex:'9999', boxShadow:'0 8px 30px rgba(0,0,0,0.2)', transition:'opacity 0.3s',
+    whiteSpace:'nowrap'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ——— INIT ———
+renderAll();
+if (settings.notifEnabled) scheduleNotification();
+
+// Check for pre-reminders
+function checkPreReminders() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  items.forEach(item => {
+    if (!item.date || item.done) return;
+    const date = new Date(item.date + 'T00:00:00');
+    const diff = Math.round((date - today) / 86400000);
+    if (
+      (item.preReminds.includes('1day') && diff === 1) ||
+      (item.preReminds.includes('2days') && diff === 2) ||
+      (item.preReminds.includes('1week') && diff === 7)
+    ) {
+      // Show in-app reminder badge
+      console.log('Pre-reminder due for:', item.title);
+    }
+  });
+}
+checkPreReminders();
+</script>
+</body>
+</html>
