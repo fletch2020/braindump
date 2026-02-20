@@ -330,16 +330,28 @@
   .send-options-panel .send-sublabel { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
   .send-method-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
-  /* CALENDAR BUTTON */
-  .cal-btn {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 12px;
-    background: #ede9f8; color: #5b21b6;
-    border: 2px solid #c084fc; border-radius: 50px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.75rem;
-    cursor: pointer; transition: all 0.2s;
+  /* SAVE & CALENDAR BUTTON */
+  .btn-cal-save {
+    background: var(--accent1); color: white;
+    box-shadow: 0 3px 10px rgba(124,58,237,0.25);
   }
-  .cal-btn:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+  .btn-cal-save:hover:not(:disabled) { background: #5b21b6; transform: translateY(-1px); }
+  .btn-cal-save:disabled {
+    background: #d4cce8; color: #a090c0;
+    box-shadow: none; cursor: not-allowed; transform: none;
+  }
+
+  /* CALENDAR BUTTON (on cards) */
+  .cal-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px;
+    background: var(--accent1); color: white;
+    border: none; border-radius: 50px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(124,58,237,0.25);
+  }
+  .cal-btn:hover { background: #5b21b6; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(124,58,237,0.35); }
 </style>
 </head>
 <body>
@@ -431,11 +443,11 @@
       <div class="reminder-options" id="reminder-options">
         <div class="form-group">
           <label>Date of the event</label>
-          <input type="date" id="item-date">
+          <input type="date" id="item-date" onchange="updateCalBtn()">
         </div>
         <div class="form-group">
           <label>Time of the event (optional)</label>
-          <input type="time" id="item-time">
+          <input type="time" id="item-time" onchange="updateCalBtn()">
         </div>
         <div>
           <label>Also remind me in advance?</label>
@@ -473,6 +485,7 @@
 
       <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="saveItem()">💾 Save it!</button>
+        <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled>📅 Save &amp; Add to Calendar</button>
         <button class="btn btn-secondary" onclick="clearForm()">🗑 Clear</button>
       </div>
     </div>
@@ -582,6 +595,7 @@ function selectType(type) {
   document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
   document.getElementById('type-' + type).classList.add('selected');
   document.getElementById('reminder-options').classList.toggle('show', type === 'reminder');
+  updateCalBtn();
 }
 
 function togglePreRemind(btn, val) {
@@ -615,6 +629,53 @@ function clearForm() {
   preReminds = [];
   document.querySelectorAll('.pre-remind-btn').forEach(b => b.classList.remove('selected'));
   selectType('note');
+  updateCalBtn();
+}
+
+function updateCalBtn() {
+  const btn = document.getElementById('save-cal-btn');
+  if (!btn) return;
+  const date = document.getElementById('item-date').value;
+  const time = document.getElementById('item-time').value;
+  const isReminder = currentType === 'reminder';
+  // Enable only if it's a reminder AND has at least a date
+  btn.disabled = !(isReminder && date);
+}
+
+function saveItemAndCalendar() {
+  const title = document.getElementById('item-title').value.trim();
+  if (!title) { alert('Please enter something to remember!'); return; }
+  const date = document.getElementById('item-date').value;
+  const time = document.getElementById('item-time').value;
+  if (!date) { alert('Please add a date first!'); return; }
+
+  // Save the item first
+  const item = {
+    id: Date.now(), type: currentType, title,
+    notes: document.getElementById('item-notes').value.trim(),
+    date, time,
+    preReminds: [...preReminds],
+    forPartner: document.getElementById('item-partner-flag').checked,
+    done: false, created: new Date().toISOString()
+  };
+  items.unshift(item);
+  save();
+
+  // Then generate and download the ICS
+  const ics = generateICS(title, item.notes, date, time);
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title.replace(/[^a-z0-9]/gi, '_') + '.ics';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+
+  clearForm();
+  showTab('today');
+  showToast('✅ Saved & sent to your calendar!');
 }
 
 // ——— RENDER ———
@@ -677,8 +738,8 @@ function renderAllItems() {
           <span class="item-tag tag-${item.type}">${item.type==='note'?'📌 Note':'⏰ Reminder'}</span>
           ${item.forPartner?'<span class="item-tag tag-partner">💌 To share</span>':''}
           ${item.done?'<span class="item-tag" style="background:#e8f5f0;color:#c084fc;">✅ Done</span>':''}
-          ${item.date?`<button class="cal-btn" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button>`:''}
         </div>
+        ${item.date && item.type==='reminder' ? `<div style="margin-top:8px;"><button class="cal-btn" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button></div>` : ''}
         ${quickBtns}
       </div>
     </div>`;
