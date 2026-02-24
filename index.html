@@ -449,19 +449,9 @@
     <div class="section-title">Add Something ✏️</div>
     <div class="card">
 
-      <!-- TYPE PICKER -->
-      <div class="type-picker">
-        <div class="type-option selected" onclick="selectType('note')" id="type-note">
-          <span class="type-icon">📌</span>Note
-        </div>
-        <div class="type-option" onclick="selectType('reminder')" id="type-reminder">
-          <span class="type-icon">📅</span>Reminder
-        </div>
-      </div>
-
       <!-- VOICE + TEXT INPUT -->
       <div class="form-group">
-        <label>What do you need to remember?</label>
+        <label>Note / Reminder</label>
         <input type="text" id="item-title" placeholder="Type or use the mic below...">
         <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
           🎤 <span id="voice-btn-label">Tap to speak</span>
@@ -475,7 +465,7 @@
       </div>
 
       <!-- REMINDER OPTIONS -->
-      <div class="reminder-options" id="reminder-options">
+      <div class="reminder-options show" id="reminder-options">
         <div class="form-group">
           <label>Date</label>
           <input type="date" id="item-date" onchange="updateCalBtn()">
@@ -607,7 +597,7 @@ if (!settings.contacts) {
   ];
 }
 let checkedToday = JSON.parse(localStorage.getItem('df_checked') || '[]');
-let currentType = 'note';
+let currentType = 'reminder';
 let preReminds = [];
 let notifInterval = null;
 let deferredInstallPrompt = null;
@@ -663,7 +653,7 @@ function clearForm() {
   document.getElementById('send-contact-options').style.display = 'none';
   preReminds = [];
   document.querySelectorAll('.pre-remind-btn').forEach(b => b.classList.remove('selected'));
-  selectType('note');
+  currentType = 'reminder';
   updateCalBtn();
   // Stop voice if active
   if (isListening && recognition) recognition.stop();
@@ -726,8 +716,8 @@ function formatDate(d) {
 }
 
 function getIcon(item) {
-  if (item.type === 'reminder') return '📅';
   if (item.forPartner) return '💌';
+  if (item.date) return '📅';
   return '📌';
 }
 
@@ -753,14 +743,14 @@ function renderAllItems() {
       quickBtns = `<div class="quick-contacts"><div class="quick-contacts-label">Quick send to:</div><div class="quick-contact-btns">${btns}</div></div>`;
     }
     return `
-    <div class="item-card type-${item.type} ${item.done?'done':''}" onclick="openModal(${item.id})">
+    <div class="item-card ${item.date?'type-reminder':'type-note'} ${item.done?'done':''}" onclick="openModal(${item.id})">
       <div class="item-icon">${getIcon(item)}</div>
       <div class="item-body">
         <div class="item-title">${item.title}</div>
         ${item.notes?`<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>`:''}
         ${item.date?`<div class="item-meta">📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}</div>`:''}
         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
-          <span class="item-tag tag-${item.type}">${item.type==='note'?'📌 Note':'⏰ Reminder'}</span>
+          <span class="item-tag tag-reminder">${item.date?'⏰ Reminder':'📌 Note'}</span>
           ${item.forPartner?'<span class="item-tag tag-partner">💌 To share</span>':''}
           ${item.done?'<span class="item-tag" style="background:#e8f5f0;color:#c084fc;">✅ Done</span>':''}
         </div>
@@ -1229,7 +1219,6 @@ function initVoice() {
     for (let i = e.resultIndex; i < e.results.length; i++) {
       transcript += e.results[i][0].transcript;
     }
-    // Put the words into the title input so user can edit them
     document.getElementById('item-title').value = transcript;
   };
 
@@ -1238,6 +1227,9 @@ function initVoice() {
     document.getElementById('voice-btn').classList.remove('listening');
     document.getElementById('voice-btn-label').textContent = 'Tap to speak';
     document.getElementById('voice-status').style.display = 'none';
+    // Parse the final transcript for date, time and contact
+    const transcript = document.getElementById('item-title').value;
+    if (transcript) parseVoiceTranscript(transcript);
   };
 
   recognition.onerror = (e) => {
@@ -1262,6 +1254,189 @@ function toggleVoice() {
   } else {
     document.getElementById('item-title').value = '';
     recognition.start();
+  }
+}
+
+// ——— SMART VOICE PARSING ———
+function parseVoiceTranscript(transcript) {
+  let text = transcript;
+  let matched = [];
+
+  // ——— DATE PARSING ———
+  const today = new Date();
+  let detectedDate = null;
+
+  // "today"
+  if (/\btoday\b/i.test(text)) {
+    detectedDate = new Date();
+    text = text.replace(/\btoday\b/i, '').trim();
+    matched.push('date');
+  }
+  // "tomorrow"
+  else if (/\btomorrow\b/i.test(text)) {
+    detectedDate = new Date();
+    detectedDate.setDate(detectedDate.getDate() + 1);
+    text = text.replace(/\btomorrow\b/i, '').trim();
+    matched.push('date');
+  }
+  // "next Monday/Tuesday..." etc
+  else {
+    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const nextDayMatch = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+    if (nextDayMatch) {
+      const targetDay = dayNames.indexOf(nextDayMatch[1].toLowerCase());
+      const d = new Date();
+      d.setDate(d.getDate() + ((targetDay - d.getDay() + 7) % 7 || 7) + 7);
+      detectedDate = d;
+      text = text.replace(nextDayMatch[0], '').trim();
+      matched.push('date');
+    } else {
+      // "this Monday" / "on Friday"
+      const thisDayMatch = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+      if (thisDayMatch) {
+        const targetDay = dayNames.indexOf(thisDayMatch[1].toLowerCase());
+        const d = new Date();
+        let diff = (targetDay - d.getDay() + 7) % 7;
+        if (diff === 0) diff = 7; // next occurrence if same day
+        d.setDate(d.getDate() + diff);
+        detectedDate = d;
+        text = text.replace(thisDayMatch[0], '').trim();
+        matched.push('date');
+      }
+    }
+  }
+
+  // "on the 15th", "on the 3rd of March", "March 15th", "15th March"
+  if (!detectedDate) {
+    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const ordinals = {'1st':1,'2nd':2,'3rd':3,'4th':4,'5th':5,'6th':6,'7th':7,'8th':8,'9th':9,'10th':10,
+      '11th':11,'12th':12,'13th':13,'14th':14,'15th':15,'16th':16,'17th':17,'18th':18,'19th':19,'20th':20,
+      '21st':21,'22nd':22,'23rd':23,'24th':24,'25th':25,'26th':26,'27th':27,'28th':28,'29th':29,'30th':30,'31st':31};
+
+    // "15th March" or "March 15th" or "the 15th of March"
+    const dateMatch = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
+                  || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    if (dateMatch) {
+      let dayStr, monthStr;
+      if (months.includes(dateMatch[1].toLowerCase())) {
+        monthStr = dateMatch[1]; dayStr = dateMatch[2];
+      } else {
+        dayStr = dateMatch[1]; monthStr = dateMatch[2];
+      }
+      const day = parseInt(dayStr);
+      const month = months.indexOf(monthStr.toLowerCase());
+      const d = new Date(today.getFullYear(), month, day);
+      if (d < today) d.setFullYear(d.getFullYear() + 1);
+      detectedDate = d;
+      text = text.replace(dateMatch[0], '').trim();
+      matched.push('date');
+    }
+  }
+
+  // Set date field
+  if (detectedDate) {
+    const yyyy = detectedDate.getFullYear();
+    const mm = String(detectedDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(detectedDate.getDate()).padStart(2, '0');
+    document.getElementById('item-date').value = `${yyyy}-${mm}-${dd}`;
+    updateCalBtn();
+  }
+
+  // ——— TIME PARSING ———
+  // "at 3pm", "at 3:30", "at half past 7", "at quarter past 8", "at 15:00"
+  let detectedTime = null;
+
+  const timeMatch = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+  if (timeMatch) {
+    let h = parseInt(timeMatch[1]);
+    const m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+    const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+    if (ampm === 'pm' && h < 12) h += 12;
+    if (ampm === 'am' && h === 12) h = 0;
+    if (!ampm && h < 7) h += 12; // assume pm for ambiguous times like "at 3"
+    detectedTime = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    text = text.replace(timeMatch[0], '').trim();
+    matched.push('time');
+  }
+  // "half past 7" = 7:30, "quarter past 8" = 8:15, "quarter to 9" = 8:45
+  else {
+    const halfPast = text.match(/\bhalf\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qtrPast  = text.match(/\bquarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qtrTo    = text.match(/\bquarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const wordNums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
+
+    const parseHour = s => isNaN(s) ? (wordNums[s.toLowerCase()]||0) : parseInt(s);
+
+    if (halfPast) {
+      let h = parseHour(halfPast[1]); if (h < 7) h += 12;
+      detectedTime = `${String(h).padStart(2,'0')}:30`;
+      text = text.replace(halfPast[0], '').trim(); matched.push('time');
+    } else if (qtrPast) {
+      let h = parseHour(qtrPast[1]); if (h < 7) h += 12;
+      detectedTime = `${String(h).padStart(2,'0')}:15`;
+      text = text.replace(qtrPast[0], '').trim(); matched.push('time');
+    } else if (qtrTo) {
+      let h = parseHour(qtrTo[1]) - 1; if (h < 7) h += 12;
+      detectedTime = `${String(h).padStart(2,'0')}:45`;
+      text = text.replace(qtrTo[0], '').trim(); matched.push('time');
+    }
+  }
+
+  if (detectedTime) {
+    document.getElementById('item-time').value = detectedTime;
+  }
+
+  // ——— CONTACT PARSING ———
+  // "send to Louise", "tell Louise", "let Louise know", "message Sarah"
+  const namedContacts = getNamedContacts();
+  let detectedContact = null;
+
+  const sendPatterns = [
+    /\b(?:send\s+to|tell|let|message|remind|notify|text|whatsapp)\s+(\w+)\b/i,
+    /\b(\w+)\s+needs\s+to\s+know\b/i,
+  ];
+
+  for (const pattern of sendPatterns) {
+    const m = text.match(pattern);
+    if (m) {
+      const spokenName = m[1].toLowerCase();
+      // Try to match against saved contacts
+      const match = namedContacts.find(c => c.name.toLowerCase() === spokenName
+        || c.name.toLowerCase().startsWith(spokenName));
+      if (match) {
+        detectedContact = match.name;
+        text = text.replace(m[0], '').trim();
+        matched.push('contact: ' + match.name);
+      }
+      break;
+    }
+  }
+
+  if (detectedContact) {
+    // Tick the share checkbox and select the contact
+    document.getElementById('item-partner-flag').checked = true;
+    document.getElementById('send-contact-options').style.display = 'block';
+    renderInlineQuickContacts();
+    // Small delay to let the DOM update
+    setTimeout(() => selectInlineContact(detectedContact), 100);
+  }
+
+  // ——— CLEAN UP TEXT ———
+  // Remove filler words left over, tidy punctuation
+  text = text.replace(/\s+/g, ' ')
+             .replace(/^[,\s]+|[,\s]+$/g, '')
+             .replace(/\bon\s+the\b/gi, '')
+             .replace(/\s{2,}/g, ' ')
+             .trim();
+
+  // Capitalise first letter
+  if (text) text = text.charAt(0).toUpperCase() + text.slice(1);
+
+  document.getElementById('item-title').value = text;
+
+  // Show what was detected
+  if (matched.length) {
+    showToast('✨ Got it! Filled in: ' + matched.join(', '));
   }
 }
 
