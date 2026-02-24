@@ -482,7 +482,6 @@
             <button class="pre-remind-btn" onclick="togglePreRemind(this, '1week')">1 Week before</button>
           </div>
         </div>
-        <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled>📅 Save &amp; Add to Calendar</button>
       </div>
 
       <!-- SHARE WITH SOMEONE -->
@@ -509,9 +508,11 @@
         </div>
       </div>
 
-      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="saveItem()">💾 Save it!</button>
-        <button class="btn btn-secondary" onclick="clearForm()">🗑 Clear</button>
+      <!-- SAVE BUTTONS -->
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary" style="justify-content:center;" onclick="saveItem()">💾 Save it!</button>
+        <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled style="justify-content:center;">📅 Save &amp; Add to Calendar</button>
+        <button class="btn btn-secondary" style="justify-content:center;" onclick="clearForm()">🗑 Clear</button>
       </div>
     </div>
   </div>
@@ -1190,6 +1191,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('send-contact-options').style.display = flag.checked ? 'block' : 'none';
   });
 });
+
+// ——— SEND FROM ADD FORM ———
+function getInlineContactDetails() {
+  const name = (document.getElementById('inline-contact-name').value || '').trim();
+  // Match name to a saved contact to get their phone number
+  const contact = settings.contacts.find(c => c.name.toLowerCase() === name.toLowerCase()) || {};
+  const title = (document.getElementById('item-title').value || '').trim();
+  return { name, phone: contact.phone || '', text: title };
+}
+
+function sendNoteWhatsApp() {
+  const { name, phone, text } = getInlineContactDetails();
+  if (!text) { showToast('⚠️ Please enter something first!'); return; }
+  if (!phone && !name) { showToast('⚠️ No contact selected!'); return; }
+  if (!phone) { showToast('⚠️ No phone number saved for ' + name + ' — add it in Settings'); return; }
+  const fullMsg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
+  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
+}
+
+function sendNoteSMS() {
+  const { name, phone, text } = getInlineContactDetails();
+  if (!text) { showToast('⚠️ Please enter something first!'); return; }
+  if (!phone) { showToast('⚠️ No phone number saved for ' + name + ' — add it in Settings'); return; }
+  const fullMsg = encodeURIComponent((name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠");
+  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
+  window.location.href = 'sms:' + phone + sep + 'body=' + fullMsg;
+}
+
+function copyNoteMessage() {
+  const { name, text } = getInlineContactDetails();
+  if (!text) { showToast('⚠️ Please enter something first!'); return; }
+  const fullMsg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
+  navigator.clipboard.writeText(fullMsg).then(() => showToast('📋 Copied!'));
+}
 
 // ——— VOICE INPUT ———
 let recognition = null;
