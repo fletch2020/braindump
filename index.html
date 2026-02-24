@@ -330,6 +330,33 @@
   .send-options-panel .send-sublabel { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
   .send-method-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
+  /* VOICE BUTTON */
+  .voice-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: #ede9f8;
+    color: #7c3aed;
+    border: 2px solid #c084fc;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .voice-btn:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+  .voice-btn.listening {
+    background: #7c3aed;
+    color: white;
+    border-color: #5b21b6;
+    animation: pulse 1s infinite;
+  }
+
   /* SAVE & CALENDAR BUTTON */
   .btn-cal-save {
     background: var(--accent1); color: white;
@@ -421,56 +448,65 @@
   <div class="panel" id="panel-add">
     <div class="section-title">Add Something ✏️</div>
     <div class="card">
-      <h2>📝 What type of thing is this?</h2>
+
+      <!-- TYPE PICKER -->
       <div class="type-picker">
         <div class="type-option selected" onclick="selectType('note')" id="type-note">
-          <span class="type-icon">📌</span>Note / Info
+          <span class="type-icon">📌</span>Note
         </div>
         <div class="type-option" onclick="selectType('reminder')" id="type-reminder">
           <span class="type-icon">📅</span>Reminder
         </div>
       </div>
 
+      <!-- VOICE + TEXT INPUT -->
       <div class="form-group">
         <label>What do you need to remember?</label>
-        <input type="text" id="item-title" placeholder="e.g. We're out for tea on Friday!">
-      </div>
-      <div class="form-group">
-        <label>Any extra details? (optional)</label>
-        <textarea id="item-notes" placeholder="Any extra info..."></textarea>
+        <input type="text" id="item-title" placeholder="Type or use the mic below...">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+          🎤 <span id="voice-btn-label">Tap to speak</span>
+        </button>
+        <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:700; margin-top:8px; text-align:center;">
+          🔴 Listening — speak now...
+        </div>
+        <div id="voice-unsupported" style="display:none; font-size:0.8rem; color:var(--muted); margin-top:6px;">
+          ⚠️ Voice not supported on this browser. Try Chrome or Safari.
+        </div>
       </div>
 
+      <!-- REMINDER OPTIONS -->
       <div class="reminder-options" id="reminder-options">
         <div class="form-group">
-          <label>Date of the event</label>
+          <label>Date</label>
           <input type="date" id="item-date" onchange="updateCalBtn()">
         </div>
         <div class="form-group">
-          <label>Time of the event (optional)</label>
+          <label>Time (optional)</label>
           <input type="time" id="item-time" onchange="updateCalBtn()">
         </div>
-        <div>
-          <label>Also remind me in advance?</label>
+        <div style="margin-bottom:14px;">
+          <label>Remind me in advance?</label>
           <div class="pre-remind-options">
             <button class="pre-remind-btn" onclick="togglePreRemind(this, '1day')">1 Day before</button>
             <button class="pre-remind-btn" onclick="togglePreRemind(this, '2days')">2 Days before</button>
             <button class="pre-remind-btn" onclick="togglePreRemind(this, '1week')">1 Week before</button>
           </div>
         </div>
+        <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled>📅 Save &amp; Add to Calendar</button>
       </div>
 
-      <div style="margin-top: 8px;">
+      <!-- SHARE WITH SOMEONE -->
+      <div style="margin-top:16px;">
         <label class="checkbox-item">
           <input type="checkbox" id="item-partner-flag">
           <span class="checkbox-box"></span>
-          <span style="font-weight:700; font-size:0.9rem;">💌 Someone else needs to know this too</span>
+          <span style="font-weight:700; font-size:0.9rem;">💌 Someone else needs to know this</span>
         </label>
       </div>
 
-      <!-- SEND OPTIONS — shown when checkbox ticked -->
       <div class="send-options-panel" id="send-contact-options">
-        <div class="send-label">📲 Send it to them now?</div>
-        <div class="send-sublabel">Tap a contact or type a name below:</div>
+        <div class="send-label">📲 Send to someone now?</div>
+        <div class="send-sublabel">Tap a contact or type a name:</div>
         <div id="inline-quick-contacts" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
         <div class="form-group">
           <label>Or type their name</label>
@@ -485,7 +521,6 @@
 
       <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="saveItem()">💾 Save it!</button>
-        <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled>📅 Save &amp; Add to Calendar</button>
         <button class="btn btn-secondary" onclick="clearForm()">🗑 Clear</button>
       </div>
     </div>
@@ -609,7 +644,7 @@ function saveItem() {
   if (!title) { alert('Please enter something to remember!'); return; }
   items.unshift({
     id: Date.now(), type: currentType, title,
-    notes: document.getElementById('item-notes').value.trim(),
+    notes: '',
     date: document.getElementById('item-date').value,
     time: document.getElementById('item-time').value,
     preReminds: [...preReminds],
@@ -630,52 +665,42 @@ function clearForm() {
   document.querySelectorAll('.pre-remind-btn').forEach(b => b.classList.remove('selected'));
   selectType('note');
   updateCalBtn();
+  // Stop voice if active
+  if (isListening && recognition) recognition.stop();
+  document.getElementById('voice-status').style.display = 'none';
+  document.getElementById('voice-btn').classList.remove('listening');
+  document.getElementById('voice-btn-label').textContent = 'Tap to speak';
 }
 
 function updateCalBtn() {
   const btn = document.getElementById('save-cal-btn');
   if (!btn) return;
   const date = document.getElementById('item-date').value;
-  const time = document.getElementById('item-time').value;
-  const isReminder = currentType === 'reminder';
-  // Enable only if it's a reminder AND has at least a date
-  btn.disabled = !(isReminder && date);
+  btn.disabled = !date;
 }
 
 function saveItemAndCalendar() {
   const title = document.getElementById('item-title').value.trim();
   if (!title) { alert('Please enter something to remember!'); return; }
   const date = document.getElementById('item-date').value;
-  const time = document.getElementById('item-time').value;
   if (!date) { alert('Please add a date first!'); return; }
 
-  // Save the item first
+  // Save the item
   const item = {
     id: Date.now(), type: currentType, title,
-    notes: document.getElementById('item-notes').value.trim(),
-    date, time,
+    notes: '',
+    date, time: document.getElementById('item-time').value,
     preReminds: [...preReminds],
     forPartner: document.getElementById('item-partner-flag').checked,
     done: false, created: new Date().toISOString()
   };
   items.unshift(item);
   save();
-
-  // Then generate and download the ICS
-  const ics = generateICS(title, item.notes, date, time);
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = title.replace(/[^a-z0-9]/gi, '_') + '.ics';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-
   clearForm();
   showTab('today');
-  showToast('✅ Saved & sent to your calendar!');
+  showToast('✅ Saved! Now choose your calendar app...');
+  // Show the calendar picker after a short delay so the tab switch completes
+  setTimeout(() => showCalPicker(item.id), 400);
 }
 
 // ——— RENDER ———
@@ -855,7 +880,7 @@ function openModal(id) {
   const calBtn = document.getElementById('modal-cal-btn');
   if (item.date) {
     calBtn.style.display = 'inline-flex';
-    calBtn.onclick = () => addToCalendar(id);
+    calBtn.onclick = () => showCalPicker(id);
   } else {
     calBtn.style.display = 'none';
   }
@@ -915,55 +940,80 @@ function copyText(message) {
 }
 
 // ——— CALENDAR EXPORT ———
-function generateICS(title, notes, date, time) {
+function buildGoogleCalUrl(title, notes, date, time) {
+  // Google Calendar URL format
+  const dateStr = date.replace(/-/g, '');
+  let dates;
+  if (time) {
+    const [h, m] = time.split(':').map(Number);
+    const endH = String(h + 1).padStart(2, '0');
+    const mStr = String(m).padStart(2, '0');
+    dates = dateStr + 'T' + String(h).padStart(2,'0') + mStr + '00' + '/' + dateStr + 'T' + endH + mStr + '00';
+  } else {
+    // All day — end date is next day
+    const nextDay = new Date(date + 'T00:00:00');
+    nextDay.setDate(nextDay.getDate() + 1);
+    const nextStr = nextDay.toISOString().split('T')[0].replace(/-/g, '');
+    dates = dateStr + '/' + nextStr;
+  }
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: dates,
+    details: notes || '',
+  });
+  return 'https://calendar.google.com/calendar/render?' + params.toString();
+}
+
+function buildAppleCalUrl(title, notes, date, time) {
+  // Apple Calendar uses webcal:// or a direct ICS download
+  // Best approach for Apple is still ICS but we trigger it cleanly
   const dateStr = date.replace(/-/g, '');
   let dtStart, dtEnd;
   if (time) {
-    const timeStr = time.replace(':', '') + '00';
-    dtStart = dateStr + 'T' + timeStr;
     const [h, m] = time.split(':').map(Number);
     const endH = String(h + 1).padStart(2, '0');
-    dtEnd = dateStr + 'T' + endH + String(m).padStart(2, '0') + '00';
+    dtStart = dateStr + 'T' + String(h).padStart(2,'0') + String(m).padStart(2,'0') + '00';
+    dtEnd   = dateStr + 'T' + endH + String(m).padStart(2,'0') + '00';
   } else {
     dtStart = dateStr;
     const nextDay = new Date(date + 'T00:00:00');
     nextDay.setDate(nextDay.getDate() + 1);
     dtEnd = nextDay.toISOString().split('T')[0].replace(/-/g, '');
   }
-  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
-  const uid = 'dontforget-' + Date.now() + '@dontforget';
-  const desc = (notes || '').split('\n').join('\\n');
   const isAllDay = !time;
   const dtStartLine = isAllDay ? 'DTSTART;VALUE=DATE:' + dtStart : 'DTSTART:' + dtStart;
   const dtEndLine   = isAllDay ? 'DTEND;VALUE=DATE:'   + dtEnd   : 'DTEND:'   + dtEnd;
-  const lines = [
+  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+  const icsLines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//DontForget//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    'UID:' + uid,
+    'UID:dontforget-' + Date.now() + '@dontforget',
     'DTSTAMP:' + now,
     dtStartLine,
     dtEndLine,
     'SUMMARY:' + title,
-    desc ? 'DESCRIPTION:' + desc : '',
-    'BEGIN:VALARM',
-    'TRIGGER:-PT30M',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Reminder: ' + title,
-    'END:VALARM',
+    notes ? 'DESCRIPTION:' + notes.split('\n').join('\\n') : '',
     'END:VEVENT',
     'END:VCALENDAR'
-  ];
-  return lines.filter(Boolean).join('\r\n');
+  ].filter(Boolean).join('\r\n');
+  return icsLines;
 }
 
-function addToCalendar(id) {
+function addToGoogleCalendar(id) {
   const item = items.find(i => i.id === id);
-  if (!item || !item.date) { showToast('No date set for this reminder!'); return; }
-  const ics = generateICS(item.title, item.notes, item.date, item.time);
+  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
+  window.open(buildGoogleCalUrl(item.title, item.notes, item.date, item.time), '_blank');
+}
+
+function addToAppleCalendar(id) {
+  const item = items.find(i => i.id === id);
+  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
+  const ics = buildAppleCalUrl(item.title, item.notes, item.date, item.time);
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -973,7 +1023,45 @@ function addToCalendar(id) {
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-  showToast('📅 Opening in your calendar app!');
+  showToast('📅 Opening Apple Calendar...');
+}
+
+// Used by card buttons — show a mini picker
+function addToCalendar(id) {
+  const item = items.find(i => i.id === id);
+  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
+  showCalPicker(id);
+}
+
+function showCalPicker(id) {
+  // Remove any existing picker
+  const existing = document.getElementById('cal-picker-popup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'cal-picker-popup';
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+  popup.innerHTML = `
+    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;animation:slideUp 0.3s ease;">
+      <div style="font-family:'Righteous',cursive;font-size:1.4rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>
+      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:18px;">Choose your calendar app — it opens straight in with everything filled in, just tap Save!</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="addToGoogleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
+          style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          📅 Add to Google Calendar
+        </button>
+        <button onclick="addToAppleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
+          style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          🍎 Add to Apple Calendar
+        </button>
+        <button onclick="document.getElementById('cal-picker-popup').remove();"
+          style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
+          Cancel
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
 }
 
 // ——— NOTIFICATIONS ———
@@ -1112,6 +1200,70 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('send-contact-options').style.display = flag.checked ? 'block' : 'none';
   });
 });
+
+// ——— VOICE INPUT ———
+let recognition = null;
+let isListening = false;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('voice-unsupported').style.display = 'block';
+    document.getElementById('voice-btn').style.display = 'none';
+    return false;
+  }
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-GB';
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('voice-btn').classList.add('listening');
+    document.getElementById('voice-btn-label').textContent = 'Listening... tap to stop';
+    document.getElementById('voice-status').style.display = 'block';
+  };
+
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    // Put the words into the title input so user can edit them
+    document.getElementById('item-title').value = transcript;
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
+    document.getElementById('voice-status').style.display = 'none';
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
+    document.getElementById('voice-status').style.display = 'none';
+    if (e.error === 'not-allowed') {
+      showToast('⚠️ Mic permission denied — check your browser settings');
+    } else if (e.error !== 'aborted') {
+      showToast('⚠️ Could not hear anything — try again');
+    }
+  };
+
+  return true;
+}
+
+function toggleVoice() {
+  if (!recognition && !initVoice()) return;
+  if (isListening) {
+    recognition.stop();
+  } else {
+    document.getElementById('item-title').value = '';
+    recognition.start();
+  }
+}
 
 // ——— INIT ———
 renderAll();
