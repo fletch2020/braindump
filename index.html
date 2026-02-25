@@ -256,6 +256,14 @@
   }
   .checklist-item:last-child { border-bottom: none; }
   .checklist-done { text-decoration: line-through; color: var(--muted); }
+  .checklist-delete-btn {
+    background: #ede9f8; border: none; border-radius: 50%;
+    width: 30px; height: 30px; flex-shrink: 0;
+    font-size: 0.85rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent1); transition: all 0.2s;
+  }
+  .checklist-delete-btn:hover { background: var(--accent1); color: white; }
 
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
@@ -734,32 +742,57 @@ function renderAllItems() {
   }
   const namedContacts = getNamedContacts();
   el.innerHTML = items.map(item => {
+    // Build the expanded detail section (hidden by default)
     let quickBtns = '';
     if (item.forPartner && namedContacts.length) {
-      const msg = item.title + (item.notes ? '\n' + item.notes : '');
+      const msg = item.title;
       const btns = namedContacts.map(c => {
         const mj = JSON.stringify(msg), nj = JSON.stringify(c.name), pj = JSON.stringify(c.phone);
         return `<button class="quick-contact-btn" onclick="event.stopPropagation(); sendToContact(${nj},${pj},${mj})">📱 ${c.name}</button>`;
       }).join('');
       quickBtns = `<div class="quick-contacts"><div class="quick-contacts-label">Quick send to:</div><div class="quick-contact-btns">${btns}</div></div>`;
     }
+
+    const calBtn = item.date ? `<button class="cal-btn" style="margin-top:8px;" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button>` : '';
+
+    const detail = `
+      <div class="item-detail" id="detail-${item.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:2px dashed #d4cce8;">
+        ${item.date ? `<div class="item-meta" style="margin-bottom:4px;">📅 ${formatDate(item.date)}${item.time ? ' at ' + item.time : ''}</div>` : ''}
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:6px;">
+          <span class="item-tag tag-reminder">${item.date ? '⏰ Reminder' : '📌 Note'}</span>
+          ${item.forPartner ? '<span class="item-tag tag-partner">💌 To share</span>' : ''}
+          ${item.done ? '<span class="item-tag" style="background:#e8f5f0;color:#5b21b6;">✅ Done</span>' : ''}
+        </div>
+        ${calBtn}
+        ${quickBtns}
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="btn btn-sm" style="background:#ede9f8;color:#5b21b6;" onclick="event.stopPropagation(); markDone(${item.id})">${item.done ? '↩ Unmark' : '✅ Done'}</button>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteItem(${item.id})">🗑 Delete</button>
+        </div>
+      </div>`;
+
     return `
-    <div class="item-card ${item.date?'type-reminder':'type-note'} ${item.done?'done':''}" onclick="openModal(${item.id})">
+    <div class="item-card ${item.date ? 'type-reminder' : 'type-note'} ${item.done ? 'done' : ''}" onclick="toggleItemDetail(${item.id})">
       <div class="item-icon">${getIcon(item)}</div>
       <div class="item-body">
-        <div class="item-title">${item.title}</div>
-        ${item.notes?`<div class="item-meta">${item.notes.substring(0,80)}${item.notes.length>80?'…':''}</div>`:''}
-        ${item.date?`<div class="item-meta">📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}</div>`:''}
-        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
-          <span class="item-tag tag-reminder">${item.date?'⏰ Reminder':'📌 Note'}</span>
-          ${item.forPartner?'<span class="item-tag tag-partner">💌 To share</span>':''}
-          ${item.done?'<span class="item-tag" style="background:#e8f5f0;color:#c084fc;">✅ Done</span>':''}
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+          <div class="item-title" style="flex:1;">${item.title}</div>
+          <div class="item-chevron" id="chevron-${item.id}" style="color:var(--muted); font-size:0.8rem; flex-shrink:0;">▼</div>
         </div>
-        ${item.date && item.type==='reminder' ? `<div style="margin-top:8px;"><button class="cal-btn" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button></div>` : ''}
-        ${quickBtns}
+        ${item.date ? `<div class="item-meta" style="margin-top:2px;">📅 ${formatDate(item.date)}${item.time ? ' at ' + item.time : ''}</div>` : ''}
+        ${detail}
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleItemDetail(id) {
+  const detail = document.getElementById('detail-' + id);
+  const chevron = document.getElementById('chevron-' + id);
+  if (!detail) return;
+  const open = detail.style.display !== 'none';
+  detail.style.display = open ? 'none' : 'block';
+  if (chevron) chevron.textContent = open ? '▼' : '▲';
 }
 
 function renderChecklist() {
@@ -779,67 +812,16 @@ function renderChecklist() {
     const checked = checkedToday.includes(item.id);
     return `
     <div class="checklist-item">
-      <div class="check-circle ${checked?'checked':''}" onclick="toggleCheck(${item.id})">${checked?'✓':''}</div>
-      <label class="${checked?'checklist-done':''}" onclick="toggleCheck(${item.id})" style="cursor:pointer;flex:1;">
+      <div class="check-circle ${checked ? 'checked' : ''}" onclick="toggleCheck(${item.id})">${checked ? '✓' : ''}</div>
+      <label class="${checked ? 'checklist-done' : ''}" style="flex:1; cursor:pointer;" onclick="toggleCheck(${item.id})">
         ${getIcon(item)} <strong>${item.title}</strong>
-        ${item.date?` <span style="color:var(--muted);font-size:0.8rem;">(${formatDate(item.date)})</span>`:''}
+        ${item.date ? `<span style="color:var(--muted);font-size:0.8rem;"> (${formatDate(item.date)})</span>` : ''}
       </label>
+      <button class="checklist-delete-btn" onclick="event.stopPropagation(); removeCheckedItem(${item.id})" title="Delete">🗑</button>
     </div>`;
   }).join('');
 }
 
-function renderContactsSettings() {
-  const el = document.getElementById('contacts-settings-list');
-  if (!el) return;
-  el.innerHTML = settings.contacts.map((c, i) => `
-    <div class="contact-slot">
-      <div class="contact-slot-header">
-        <div class="contact-number">${i+1}</div>
-        <h3>${c.name ? '👤 ' + c.name : 'Contact ' + (i+1) + ' — empty'}</h3>
-      </div>
-      <div class="contact-inputs">
-        <input type="text" id="contact-name-${i}" placeholder="Name (e.g. Mum)" value="${c.name||''}">
-        <input type="text" id="contact-phone-${i}" placeholder="07911123456 or +447911123456" value="${c.phone||''}">
-      </div>
-    </div>`).join('');
-}
-
-function renderInlineQuickContacts() {
-  const el = document.getElementById('inline-quick-contacts');
-  if (!el) return;
-  const named = getNamedContacts();
-  if (!named.length) {
-    el.innerHTML = '<span style="font-size:0.8rem;color:var(--muted);">💡 Add contacts in Settings for quick buttons</span>';
-    return;
-  }
-  el.innerHTML = named.map(c => `
-    <button class="quick-contact-btn" onclick="selectInlineContact('${c.name}')">👤 ${c.name}</button>
-  `).join('');
-}
-
-function selectInlineContact(name) {
-  document.getElementById('inline-contact-name').value = name;
-  document.querySelectorAll('#inline-quick-contacts .quick-contact-btn').forEach(b => {
-    b.classList.toggle('selected', b.textContent.trim().endsWith(name));
-  });
-}
-
-// ——— CONTACTS SAVE ———
-function saveContacts() {
-  settings.contacts = settings.contacts.map((c, i) => ({
-    name: (document.getElementById(`contact-name-${i}`) || {}).value || '',
-    phone: (document.getElementById(`contact-phone-${i}`) || {}).value || ''
-  }));
-  settings.notifTime = document.getElementById('notif-time').value;
-  persistSettings();
-  showToast('💾 Contacts saved!');
-  renderAll();
-}
-
-function saveSettingsSilent() {
-  settings.notifTime = document.getElementById('notif-time').value;
-  persistSettings();
-}
 
 // ——— CHECKLIST ———
 function toggleCheck(id) {
@@ -847,635 +829,22 @@ function toggleCheck(id) {
   localStorage.setItem('df_checked', JSON.stringify(checkedToday));
   renderChecklist();
 }
+
+function removeCheckedItem(id) {
+  items = items.filter(i => i.id !== id);
+  checkedToday = checkedToday.filter(i => i !== id);
+  save();
+  localStorage.setItem('df_checked', JSON.stringify(checkedToday));
+  renderAll();
+  showToast('🗑 Removed!');
+}
+
 function resetChecklist() {
   checkedToday = [];
   localStorage.setItem('df_checked', JSON.stringify(checkedToday));
   renderChecklist();
 }
 
-// ——— MODAL ———
-function openModal(id) {
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  document.getElementById('modal-title').textContent = getIcon(item) + ' ' + item.title;
-  document.getElementById('modal-notes').textContent = item.notes || '(No extra details)';
-  let meta = '';
-  if (item.date) meta += `📅 ${formatDate(item.date)}${item.time?' at '+item.time:''}`;
-  if (item.preReminds && item.preReminds.length) meta += `  •  Advance: ${item.preReminds.join(', ')}`;
-  if (item.forPartner) meta += '  •  💌 Flagged to share';
-  document.getElementById('modal-meta').textContent = meta;
-  document.getElementById('modal-delete-btn').onclick = () => { deleteItem(id); closeModal(); };
-  document.getElementById('modal-done-btn').onclick = () => { markDone(id); closeModal(); };
-  document.getElementById('modal-done-btn').textContent = item.done ? '↩ Unmark Done' : '✅ Mark Done';
-  // Show calendar button for reminders with a date
-  const calBtn = document.getElementById('modal-cal-btn');
-  if (item.date) {
-    calBtn.style.display = 'inline-flex';
-    calBtn.onclick = () => showCalPicker(id);
-  } else {
-    calBtn.style.display = 'none';
-  }
-
-  const sendBtns = document.getElementById('modal-send-btns');
-  if (item.forPartner) {
-    const msg = item.title + (item.notes ? '\n' + item.notes : '');
-    const named = getNamedContacts();
-    const contactBtns = named.map(c => {
-      const mj=JSON.stringify(msg), nj=JSON.stringify(c.name), pj=JSON.stringify(c.phone);
-      return `<button class="quick-contact-btn" onclick="sendToContact(${nj},${pj},${mj})">📱 ${c.name}</button>`;
-    }).join('');
-    sendBtns.innerHTML = `
-      <div style="background:#e8f5f0;border:2px solid var(--accent2);border-radius:12px;padding:12px;margin-bottom:12px;">
-        <div style="font-weight:800;font-size:0.82rem;color:var(--muted);margin-bottom:8px;">📲 QUICK SEND TO:</div>
-        ${named.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">${contactBtns}</div>` : '<p style="font-size:0.82rem;color:var(--muted);margin-bottom:8px;">Add contacts in Settings for quick buttons</p>'}
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-partner btn-sm" onclick="sendToContact('','',${JSON.stringify(msg)})">📱 WhatsApp (choose contact)</button>
-          <button class="btn btn-sm" style="background:#ede9f8; color:#2d1f42;" onclick="copyText(${JSON.stringify(msg)})">📋 Copy</button>
-        </div>
-      </div>`;
-  } else {
-    sendBtns.innerHTML = '';
-  }
-  document.getElementById('modal').classList.add('open');
-}
-
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal'))
-    document.getElementById('modal').classList.remove('open');
-}
-function deleteItem(id) { items = items.filter(i => i.id !== id); save(); renderAll(); closeModal(); }
-function markDone(id) {
-  const item = items.find(i => i.id === id);
-  if (item) item.done = !item.done;
-  save(); renderAll();
-}
-
-// ——— MESSAGING ———
-function buildWhatsAppUrl(phone, message) {
-  // Strip ALL non-digit characters — wa.me needs pure digits only e.g. 447911123456
-  let cleaned = (phone||'').replace(/[^0-9]/g, '');
-  // Auto-convert UK local 07xxx to international 447xxx
-  if (cleaned.startsWith('0')) cleaned = '44' + cleaned.slice(1);
-  const encoded = encodeURIComponent(message);
-  return cleaned ? `https://wa.me/${cleaned}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
-}
-
-function sendToContact(name, phone, message) {
-  const fullMsg = `${name?name+', ':''}${message}\n\n— Sent via Don't Forget! 🧠`;
-  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
-}
-
-function copyText(message) {
-  navigator.clipboard.writeText(message + "\n\n— Sent via Don't Forget! 🧠")
-    .then(() => showToast('📋 Copied!'));
-}
-
-// ——— CALENDAR EXPORT ———
-function buildGoogleCalUrl(title, notes, date, time) {
-  // Google Calendar URL format
-  const dateStr = date.replace(/-/g, '');
-  let dates;
-  if (time) {
-    const [h, m] = time.split(':').map(Number);
-    const endH = String(h + 1).padStart(2, '0');
-    const mStr = String(m).padStart(2, '0');
-    dates = dateStr + 'T' + String(h).padStart(2,'0') + mStr + '00' + '/' + dateStr + 'T' + endH + mStr + '00';
-  } else {
-    // All day — end date is next day
-    const nextDay = new Date(date + 'T00:00:00');
-    nextDay.setDate(nextDay.getDate() + 1);
-    const nextStr = nextDay.toISOString().split('T')[0].replace(/-/g, '');
-    dates = dateStr + '/' + nextStr;
-  }
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: title,
-    dates: dates,
-    details: notes || '',
-  });
-  return 'https://calendar.google.com/calendar/render?' + params.toString();
-}
-
-function buildAppleCalUrl(title, notes, date, time) {
-  // Apple Calendar uses webcal:// or a direct ICS download
-  // Best approach for Apple is still ICS but we trigger it cleanly
-  const dateStr = date.replace(/-/g, '');
-  let dtStart, dtEnd;
-  if (time) {
-    const [h, m] = time.split(':').map(Number);
-    const endH = String(h + 1).padStart(2, '0');
-    dtStart = dateStr + 'T' + String(h).padStart(2,'0') + String(m).padStart(2,'0') + '00';
-    dtEnd   = dateStr + 'T' + endH + String(m).padStart(2,'0') + '00';
-  } else {
-    dtStart = dateStr;
-    const nextDay = new Date(date + 'T00:00:00');
-    nextDay.setDate(nextDay.getDate() + 1);
-    dtEnd = nextDay.toISOString().split('T')[0].replace(/-/g, '');
-  }
-  const isAllDay = !time;
-  const dtStartLine = isAllDay ? 'DTSTART;VALUE=DATE:' + dtStart : 'DTSTART:' + dtStart;
-  const dtEndLine   = isAllDay ? 'DTEND;VALUE=DATE:'   + dtEnd   : 'DTEND:'   + dtEnd;
-  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
-  const icsLines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//DontForget//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    'UID:dontforget-' + Date.now() + '@dontforget',
-    'DTSTAMP:' + now,
-    dtStartLine,
-    dtEndLine,
-    'SUMMARY:' + title,
-    notes ? 'DESCRIPTION:' + notes.split('\n').join('\\n') : '',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].filter(Boolean).join('\r\n');
-  return icsLines;
-}
-
-function addToGoogleCalendar(id) {
-  const item = items.find(i => i.id === id);
-  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
-  window.open(buildGoogleCalUrl(item.title, item.notes, item.date, item.time), '_blank');
-}
-
-function addToAppleCalendar(id) {
-  const item = items.find(i => i.id === id);
-  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
-  const ics = buildAppleCalUrl(item.title, item.notes, item.date, item.time);
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = item.title.replace(/[^a-z0-9]/gi, '_') + '.ics';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-  showToast('📅 Opening Apple Calendar...');
-}
-
-// Used by card buttons — show a mini picker
-function addToCalendar(id) {
-  const item = items.find(i => i.id === id);
-  if (!item || !item.date) { showToast('⚠️ No date set!'); return; }
-  showCalPicker(id);
-}
-
-function showCalPicker(id) {
-  // Remove any existing picker
-  const existing = document.getElementById('cal-picker-popup');
-  if (existing) existing.remove();
-
-  const popup = document.createElement('div');
-  popup.id = 'cal-picker-popup';
-  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
-  popup.innerHTML = `
-    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;animation:slideUp 0.3s ease;">
-      <div style="font-family:'Righteous',cursive;font-size:1.4rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>
-      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:18px;">Choose your calendar app — it opens straight in with everything filled in, just tap Save!</p>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="addToGoogleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
-          style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-          📅 Add to Google Calendar
-        </button>
-        <button onclick="addToAppleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
-          style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-          🍎 Add to Apple Calendar
-        </button>
-        <button onclick="document.getElementById('cal-picker-popup').remove();"
-          style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
-          Cancel
-        </button>
-      </div>
-    </div>`;
-  document.body.appendChild(popup);
-  popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
-}
-
-// ——— NOTIFICATIONS ———
-function toggleNotifications() {
-  const enabled = document.getElementById('notif-toggle').checked;
-  if (enabled) {
-    Notification.requestPermission().then(perm => {
-      if (perm === 'granted') {
-        settings.notifEnabled = true; persistSettings();
-        scheduleNotification(); showToast('🔔 Evening reminder enabled!');
-      } else {
-        document.getElementById('notif-toggle').checked = false;
-        alert('Please allow notifications in your browser settings.');
-      }
-    });
-  } else {
-    settings.notifEnabled = false; persistSettings();
-    if (notifInterval) { clearInterval(notifInterval); notifInterval = null; }
-  }
-}
-
-function testNotification() {
-  if (Notification.permission !== 'granted') {
-    Notification.requestPermission().then(p => { if (p==='granted') fireNotification(); else alert('Please allow notifications first!'); });
-  } else fireNotification();
-}
-
-function fireNotification() {
-  const count = items.filter(i => !i.done).length;
-  new Notification("🧠 Don't Forget!", {
-    body: `You have ${count} thing${count!==1?'s':''} on your list. Time for a quick check!`,
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧠</text></svg>'
-  });
-}
-
-function scheduleNotification() {
-  if (notifInterval) clearInterval(notifInterval);
-  notifInterval = setInterval(() => {
-    const now = new Date();
-    const [h,m] = settings.notifTime.split(':').map(Number);
-    if (now.getHours()===h && now.getMinutes()===m && now.getSeconds()<30) {
-      if (settings.notifEnabled && Notification.permission==='granted') {
-        fireNotification();
-        const bar = document.getElementById('notifBar');
-        document.getElementById('notifCount').textContent = items.filter(i=>!i.done).length;
-        bar.style.display = 'block';
-        setTimeout(() => bar.style.display='none', 10000);
-      }
-    }
-  }, 20000);
-}
-
-function loadSettings() {
-  document.getElementById('notif-time').value = settings.notifTime || '19:00';
-  document.getElementById('notif-toggle').checked = settings.notifEnabled || false;
-}
-
-// ——— CLEAR ———
-function clearDone() {
-  if (!confirm('Remove all done items?')) return;
-  items = items.filter(i => !i.done); save(); renderAll(); showToast('🗑 Done items cleared!');
-}
-function clearAll() {
-  if (!confirm('Clear ALL items? This cannot be undone!')) return;
-  items = []; save(); renderAll(); showToast('🗑 Everything cleared!');
-}
-
-// ——— TOAST ———
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.textContent = msg;
-  Object.assign(t.style, {
-    position:'fixed', bottom:'30px', left:'50%', transform:'translateX(-50%)',
-    background:'#7c3aed', color:'#f3f0fa', padding:'12px 24px', borderRadius:'50px',
-    fontFamily:'Nunito,sans-serif', fontWeight:'700', fontSize:'0.9rem',
-    zIndex:'9999', boxShadow:'0 8px 30px rgba(0,0,0,0.2)', transition:'opacity 0.3s',
-    whiteSpace:'nowrap'
-  });
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2500);
-}
-
-// ——— PWA INSTALL ———
-function isIos() { return /iP(hone|ad|od)/.test(navigator.userAgent); }
-function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
-
-function handleInstallClick() {
-  if (isIos()) {
-    document.getElementById('iosModal').classList.add('open');
-  } else if (deferredInstallPrompt) {
-    triggerInstall();
-  } else {
-    alert('To install: open your browser menu and look for "Install app" or "Add to Home Screen".');
-  }
-}
-
-function triggerInstall() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then(choice => {
-    if (choice.outcome === 'accepted') showToast('🎉 App installed! Find it on your home screen.');
-    deferredInstallPrompt = null;
-    document.getElementById('installBanner').style.display = 'none';
-    document.getElementById('installHeaderBtn').classList.add('hidden');
-  });
-}
-
-function dismissBanner() {
-  document.getElementById('installBanner').style.display = 'none';
-  localStorage.setItem('df_banner_dismissed','1');
-}
-
-function closeIosModal() { document.getElementById('iosModal').classList.remove('open'); }
-
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  if (!isStandalone() && !localStorage.getItem('df_banner_dismissed'))
-    document.getElementById('installBanner').style.display = 'block';
-  document.getElementById('installHeaderBtn').classList.remove('hidden');
-});
-
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-  document.getElementById('installHeaderBtn').classList.add('hidden');
-  deferredInstallPrompt = null;
-});
-
-if (isIos() && !isStandalone())
-  document.getElementById('installHeaderBtn').classList.remove('hidden');
-
-// ——— CHECKBOX TOGGLE ———
-document.addEventListener('DOMContentLoaded', () => {
-  const flag = document.getElementById('item-partner-flag');
-  if (flag) flag.addEventListener('change', () => {
-    document.getElementById('send-contact-options').style.display = flag.checked ? 'block' : 'none';
-  });
-});
-
-// ——— SEND FROM ADD FORM ———
-function getInlineContactDetails() {
-  const name = (document.getElementById('inline-contact-name').value || '').trim();
-  // Match name to a saved contact to get their phone number
-  const contact = settings.contacts.find(c => c.name.toLowerCase() === name.toLowerCase()) || {};
-  const title = (document.getElementById('item-title').value || '').trim();
-  return { name, phone: contact.phone || '', text: title };
-}
-
-function sendNoteWhatsApp() {
-  const { name, phone, text } = getInlineContactDetails();
-  if (!text) { showToast('⚠️ Please enter something first!'); return; }
-  if (!phone && !name) { showToast('⚠️ No contact selected!'); return; }
-  if (!phone) { showToast('⚠️ No phone number saved for ' + name + ' — add it in Settings'); return; }
-  const fullMsg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
-  window.open(buildWhatsAppUrl(phone, fullMsg), '_blank');
-}
-
-function sendNoteSMS() {
-  const { name, phone, text } = getInlineContactDetails();
-  if (!text) { showToast('⚠️ Please enter something first!'); return; }
-  if (!phone) { showToast('⚠️ No phone number saved for ' + name + ' — add it in Settings'); return; }
-  const fullMsg = encodeURIComponent((name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠");
-  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
-  window.location.href = 'sms:' + phone + sep + 'body=' + fullMsg;
-}
-
-function copyNoteMessage() {
-  const { name, text } = getInlineContactDetails();
-  if (!text) { showToast('⚠️ Please enter something first!'); return; }
-  const fullMsg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
-  navigator.clipboard.writeText(fullMsg).then(() => showToast('📋 Copied!'));
-}
-
-// ——— VOICE INPUT ———
-let recognition = null;
-let isListening = false;
-
-function initVoice() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    document.getElementById('voice-unsupported').style.display = 'block';
-    document.getElementById('voice-btn').style.display = 'none';
-    return false;
-  }
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.lang = 'en-GB';
-
-  recognition.onstart = () => {
-    isListening = true;
-    document.getElementById('voice-btn').classList.add('listening');
-    document.getElementById('voice-btn-label').textContent = 'Listening... tap to stop';
-    document.getElementById('voice-status').style.display = 'block';
-  };
-
-  recognition.onresult = (e) => {
-    let transcript = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
-    }
-    document.getElementById('item-title').value = transcript;
-  };
-
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById('voice-btn').classList.remove('listening');
-    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
-    document.getElementById('voice-status').style.display = 'none';
-    // Parse the final transcript for date, time and contact
-    const transcript = document.getElementById('item-title').value;
-    if (transcript) parseVoiceTranscript(transcript);
-  };
-
-  recognition.onerror = (e) => {
-    isListening = false;
-    document.getElementById('voice-btn').classList.remove('listening');
-    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
-    document.getElementById('voice-status').style.display = 'none';
-    if (e.error === 'not-allowed') {
-      showToast('⚠️ Mic permission denied — check your browser settings');
-    } else if (e.error !== 'aborted') {
-      showToast('⚠️ Could not hear anything — try again');
-    }
-  };
-
-  return true;
-}
-
-function toggleVoice() {
-  if (!recognition && !initVoice()) return;
-  if (isListening) {
-    recognition.stop();
-  } else {
-    document.getElementById('item-title').value = '';
-    recognition.start();
-  }
-}
-
-// ——— SMART VOICE PARSING ———
-function parseVoiceTranscript(transcript) {
-  let text = transcript;
-  let matched = [];
-
-  // ——— DATE PARSING ———
-  const today = new Date();
-  let detectedDate = null;
-
-  // "today"
-  if (/\btoday\b/i.test(text)) {
-    detectedDate = new Date();
-    text = text.replace(/\btoday\b/i, '').trim();
-    matched.push('date');
-  }
-  // "tomorrow"
-  else if (/\btomorrow\b/i.test(text)) {
-    detectedDate = new Date();
-    detectedDate.setDate(detectedDate.getDate() + 1);
-    text = text.replace(/\btomorrow\b/i, '').trim();
-    matched.push('date');
-  }
-  // "next Monday/Tuesday..." etc
-  else {
-    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-    const nextDayMatch = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-    if (nextDayMatch) {
-      const targetDay = dayNames.indexOf(nextDayMatch[1].toLowerCase());
-      const d = new Date();
-      d.setDate(d.getDate() + ((targetDay - d.getDay() + 7) % 7 || 7) + 7);
-      detectedDate = d;
-      text = text.replace(nextDayMatch[0], '').trim();
-      matched.push('date');
-    } else {
-      // "this Monday" / "on Friday"
-      const thisDayMatch = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-      if (thisDayMatch) {
-        const targetDay = dayNames.indexOf(thisDayMatch[1].toLowerCase());
-        const d = new Date();
-        let diff = (targetDay - d.getDay() + 7) % 7;
-        if (diff === 0) diff = 7; // next occurrence if same day
-        d.setDate(d.getDate() + diff);
-        detectedDate = d;
-        text = text.replace(thisDayMatch[0], '').trim();
-        matched.push('date');
-      }
-    }
-  }
-
-  // "on the 15th", "on the 3rd of March", "March 15th", "15th March"
-  if (!detectedDate) {
-    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-    const ordinals = {'1st':1,'2nd':2,'3rd':3,'4th':4,'5th':5,'6th':6,'7th':7,'8th':8,'9th':9,'10th':10,
-      '11th':11,'12th':12,'13th':13,'14th':14,'15th':15,'16th':16,'17th':17,'18th':18,'19th':19,'20th':20,
-      '21st':21,'22nd':22,'23rd':23,'24th':24,'25th':25,'26th':26,'27th':27,'28th':28,'29th':29,'30th':30,'31st':31};
-
-    // "15th March" or "March 15th" or "the 15th of March"
-    const dateMatch = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
-                  || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
-    if (dateMatch) {
-      let dayStr, monthStr;
-      if (months.includes(dateMatch[1].toLowerCase())) {
-        monthStr = dateMatch[1]; dayStr = dateMatch[2];
-      } else {
-        dayStr = dateMatch[1]; monthStr = dateMatch[2];
-      }
-      const day = parseInt(dayStr);
-      const month = months.indexOf(monthStr.toLowerCase());
-      const d = new Date(today.getFullYear(), month, day);
-      if (d < today) d.setFullYear(d.getFullYear() + 1);
-      detectedDate = d;
-      text = text.replace(dateMatch[0], '').trim();
-      matched.push('date');
-    }
-  }
-
-  // Set date field
-  if (detectedDate) {
-    const yyyy = detectedDate.getFullYear();
-    const mm = String(detectedDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(detectedDate.getDate()).padStart(2, '0');
-    document.getElementById('item-date').value = `${yyyy}-${mm}-${dd}`;
-    updateCalBtn();
-  }
-
-  // ——— TIME PARSING ———
-  // "at 3pm", "at 3:30", "at half past 7", "at quarter past 8", "at 15:00"
-  let detectedTime = null;
-
-  const timeMatch = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
-  if (timeMatch) {
-    let h = parseInt(timeMatch[1]);
-    const m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-    const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
-    if (ampm === 'pm' && h < 12) h += 12;
-    if (ampm === 'am' && h === 12) h = 0;
-    if (!ampm && h < 7) h += 12; // assume pm for ambiguous times like "at 3"
-    detectedTime = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    text = text.replace(timeMatch[0], '').trim();
-    matched.push('time');
-  }
-  // "half past 7" = 7:30, "quarter past 8" = 8:15, "quarter to 9" = 8:45
-  else {
-    const halfPast = text.match(/\bhalf\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    const qtrPast  = text.match(/\bquarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    const qtrTo    = text.match(/\bquarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    const wordNums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
-
-    const parseHour = s => isNaN(s) ? (wordNums[s.toLowerCase()]||0) : parseInt(s);
-
-    if (halfPast) {
-      let h = parseHour(halfPast[1]); if (h < 7) h += 12;
-      detectedTime = `${String(h).padStart(2,'0')}:30`;
-      text = text.replace(halfPast[0], '').trim(); matched.push('time');
-    } else if (qtrPast) {
-      let h = parseHour(qtrPast[1]); if (h < 7) h += 12;
-      detectedTime = `${String(h).padStart(2,'0')}:15`;
-      text = text.replace(qtrPast[0], '').trim(); matched.push('time');
-    } else if (qtrTo) {
-      let h = parseHour(qtrTo[1]) - 1; if (h < 7) h += 12;
-      detectedTime = `${String(h).padStart(2,'0')}:45`;
-      text = text.replace(qtrTo[0], '').trim(); matched.push('time');
-    }
-  }
-
-  if (detectedTime) {
-    document.getElementById('item-time').value = detectedTime;
-  }
-
-  // ——— CONTACT PARSING ———
-  // "send to Louise", "tell Louise", "let Louise know", "message Sarah"
-  const namedContacts = getNamedContacts();
-  let detectedContact = null;
-
-  const sendPatterns = [
-    /\b(?:send\s+to|tell|let|message|remind|notify|text|whatsapp)\s+(\w+)\b/i,
-    /\b(\w+)\s+needs\s+to\s+know\b/i,
-  ];
-
-  for (const pattern of sendPatterns) {
-    const m = text.match(pattern);
-    if (m) {
-      const spokenName = m[1].toLowerCase();
-      // Try to match against saved contacts
-      const match = namedContacts.find(c => c.name.toLowerCase() === spokenName
-        || c.name.toLowerCase().startsWith(spokenName));
-      if (match) {
-        detectedContact = match.name;
-        text = text.replace(m[0], '').trim();
-        matched.push('contact: ' + match.name);
-      }
-      break;
-    }
-  }
-
-  if (detectedContact) {
-    // Tick the share checkbox and select the contact
-    document.getElementById('item-partner-flag').checked = true;
-    document.getElementById('send-contact-options').style.display = 'block';
-    renderInlineQuickContacts();
-    // Small delay to let the DOM update
-    setTimeout(() => selectInlineContact(detectedContact), 100);
-  }
-
-  // ——— CLEAN UP TEXT ———
-  // Remove filler words left over, tidy punctuation
-  text = text.replace(/\s+/g, ' ')
-             .replace(/^[,\s]+|[,\s]+$/g, '')
-             .replace(/\bon\s+the\b/gi, '')
-             .replace(/\s{2,}/g, ' ')
-             .trim();
-
-  // Capitalise first letter
-  if (text) text = text.charAt(0).toUpperCase() + text.slice(1);
-
-  document.getElementById('item-title').value = text;
-
-  // Show what was detected
-  if (matched.length) {
-    showToast('✨ Got it! Filled in: ' + matched.join(', '));
-  }
-}
-
-// ——— INIT ———
 renderAll();
 if (settings.notifEnabled) scheduleNotification();
 </script>
