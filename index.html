@@ -495,13 +495,13 @@
       <!-- SHARE WITH SOMEONE -->
       <div style="margin-top:16px;">
         <label class="checkbox-item">
-          <input type="checkbox" id="item-partner-flag">
+          <input type="checkbox" id="item-partner-flag" onchange="toggleSendPanel(this.checked)">
           <span class="checkbox-box"></span>
           <span style="font-weight:700; font-size:0.9rem;">💌 Someone else needs to know this</span>
         </label>
       </div>
 
-      <div class="send-options-panel" id="send-contact-options">
+      <div class="send-options-panel" id="send-contact-options" style="display:none;">
         <div class="send-label">📲 Send to someone now?</div>
         <div class="send-sublabel">Tap a contact or type a name:</div>
         <div id="inline-quick-contacts" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
@@ -845,6 +845,229 @@ function resetChecklist() {
   renderChecklist();
 }
 
+// ——— SEND PANEL ———
+function toggleSendPanel(show) {
+  const panel = document.getElementById('send-contact-options');
+  panel.style.display = show ? 'block' : 'none';
+  if (show) renderInlineQuickContacts();
+}
+
+function renderInlineQuickContacts() {
+  const container = document.getElementById('inline-quick-contacts');
+  if (!container) return;
+  const contacts = (settings.contacts || []).filter(c => c.name && c.name.trim());
+  if (!contacts.length) {
+    container.innerHTML = '<span style="font-size:0.8rem;color:var(--muted);">No contacts saved yet — add them in Settings!</span>';
+    return;
+  }
+  container.innerHTML = contacts.map(c => {
+    const safeId = c.name.replace(/[^a-zA-Z0-9]/g, '_');
+    return '<button class="quick-contact-btn" onclick="selectInlineContact(' + JSON.stringify(c.name) + ')" id="qc-' + safeId + '">📱 ' + c.name + '</button>';
+  }).join('');
+}
+
+function selectInlineContact(name) {
+  document.querySelectorAll('#inline-quick-contacts .quick-contact-btn').forEach(b => b.classList.remove('selected'));
+  const safeId = name.replace(/[^a-zA-Z0-9]/g, '_');
+  const btn = document.getElementById('qc-' + safeId);
+  if (btn) btn.classList.add('selected');
+  document.getElementById('inline-contact-name').value = name;
+}
+
+// ——— SEND FROM ADD FORM ———
+function getInlineContactDetails() {
+  const name = (document.getElementById('inline-contact-name').value || '').trim();
+  const contact = (settings.contacts || []).find(c => c.name.toLowerCase() === name.toLowerCase()) || {};
+  const title = (document.getElementById('item-title').value || '').trim();
+  return { name, phone: contact.phone || '', text: title };
+}
+
+function sendNoteWhatsApp() {
+  const { name, phone, text } = getInlineContactDetails();
+  if (!text) { showToast('Please enter something first!'); return; }
+  if (!name) { showToast('Please select a contact!'); return; }
+  if (!phone) { showToast('No phone number saved for ' + name + ' — add it in Settings'); return; }
+  const msg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
+  window.open(buildWhatsAppUrl(phone, msg), '_blank');
+}
+
+function sendNoteSMS() {
+  const { name, phone, text } = getInlineContactDetails();
+  if (!text) { showToast('Please enter something first!'); return; }
+  if (!phone) { showToast('No phone number saved for ' + name + ' — add it in Settings'); return; }
+  const msg = encodeURIComponent((name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠");
+  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
+  window.location.href = 'sms:' + phone + sep + 'body=' + msg;
+}
+
+function copyNoteMessage() {
+  const { name, text } = getInlineContactDetails();
+  if (!text) { showToast('Please enter something first!'); return; }
+  const msg = (name ? name + ', ' : '') + "Just a heads up — don't forget: " + text + "\n\n— Sent via Don't Forget! 🧠";
+  navigator.clipboard.writeText(msg).then(() => showToast('📋 Copied!'));
+}
+
+// ——— VOICE INPUT ———
+let recognition = null;
+let isListening = false;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    const u = document.getElementById('voice-unsupported');
+    const b = document.getElementById('voice-btn');
+    if (u) u.style.display = 'block';
+    if (b) b.style.display = 'none';
+    return false;
+  }
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-GB';
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('voice-btn').classList.add('listening');
+    document.getElementById('voice-btn-label').textContent = 'Listening... tap to stop';
+    document.getElementById('voice-status').style.display = 'block';
+  };
+
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    document.getElementById('item-title').value = transcript;
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
+    document.getElementById('voice-status').style.display = 'none';
+    const transcript = document.getElementById('item-title').value;
+    if (transcript) parseVoiceTranscript(transcript);
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn-label').textContent = 'Tap to speak';
+    document.getElementById('voice-status').style.display = 'none';
+    if (e.error === 'not-allowed') showToast('Mic permission denied — check your browser settings');
+    else if (e.error !== 'aborted') showToast('Could not hear anything — try again');
+  };
+  return true;
+}
+
+function toggleVoice() {
+  if (!recognition && !initVoice()) return;
+  if (isListening) { recognition.stop(); return; }
+  document.getElementById('item-title').value = '';
+  recognition.start();
+}
+
+function parseVoiceTranscript(transcript) {
+  let text = transcript;
+  let matched = [];
+  const today = new Date();
+  let detectedDate = null;
+
+  if (/\btoday\b/i.test(text)) {
+    detectedDate = new Date();
+    text = text.replace(/\btoday\b/i, '');
+    matched.push('date');
+  } else if (/\btomorrow\b/i.test(text)) {
+    detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate() + 1);
+    text = text.replace(/\btomorrow\b/i, '');
+    matched.push('date');
+  } else {
+    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const nextDay = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+    if (nextDay) {
+      const t = dayNames.indexOf(nextDay[1].toLowerCase());
+      const d = new Date(); d.setDate(d.getDate() + ((t - d.getDay() + 7) % 7 || 7) + 7);
+      detectedDate = d; text = text.replace(nextDay[0], ''); matched.push('date');
+    } else {
+      const thisDay = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+      if (thisDay) {
+        const t = dayNames.indexOf(thisDay[1].toLowerCase());
+        const d = new Date(); let diff = (t - d.getDay() + 7) % 7; if (diff === 0) diff = 7;
+        d.setDate(d.getDate() + diff);
+        detectedDate = d; text = text.replace(thisDay[0], ''); matched.push('date');
+      }
+    }
+  }
+
+  if (!detectedDate) {
+    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const dm = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
+            || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    if (dm) {
+      let dayStr, monthStr;
+      if (months.includes(dm[1].toLowerCase())) { monthStr = dm[1]; dayStr = dm[2]; } else { dayStr = dm[1]; monthStr = dm[2]; }
+      const d = new Date(today.getFullYear(), months.indexOf(monthStr.toLowerCase()), parseInt(dayStr));
+      if (d < today) d.setFullYear(d.getFullYear() + 1);
+      detectedDate = d; text = text.replace(dm[0], ''); matched.push('date');
+    }
+  }
+
+  if (detectedDate) {
+    const yyyy = detectedDate.getFullYear();
+    const mm = String(detectedDate.getMonth()+1).padStart(2,'0');
+    const dd = String(detectedDate.getDate()).padStart(2,'0');
+    document.getElementById('item-date').value = yyyy+'-'+mm+'-'+dd;
+    updateCalBtn();
+  }
+
+  const timeMatch = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+  let detectedTime = null;
+  if (timeMatch) {
+    let h = parseInt(timeMatch[1]), m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+    const ap = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+    if (ap === 'pm' && h < 12) h += 12; if (ap === 'am' && h === 12) h = 0; if (!ap && h < 7) h += 12;
+    detectedTime = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+    text = text.replace(timeMatch[0], ''); matched.push('time');
+  } else {
+    const wordNums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
+    const ph = s => isNaN(s) ? (wordNums[s.toLowerCase()]||0) : parseInt(s);
+    const hp = text.match(/\bhalf\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qp = text.match(/\bquarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qt = text.match(/\bquarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    if (hp) { let h = ph(hp[1]); if (h<7) h+=12; detectedTime=String(h).padStart(2,'0')+':30'; text=text.replace(hp[0],''); matched.push('time'); }
+    else if (qp) { let h = ph(qp[1]); if (h<7) h+=12; detectedTime=String(h).padStart(2,'0')+':15'; text=text.replace(qp[0],''); matched.push('time'); }
+    else if (qt) { let h = ph(qt[1])-1; if (h<7) h+=12; detectedTime=String(h).padStart(2,'0')+':45'; text=text.replace(qt[0],''); matched.push('time'); }
+  }
+  if (detectedTime) document.getElementById('item-time').value = detectedTime;
+
+  const sendPatterns = [
+    /\b(?:send\s+to|tell|let|message|remind|notify|text|whatsapp)\s+(\w+)\b/i,
+    /\b(\w+)\s+needs\s+to\s+know\b/i,
+  ];
+  const namedContacts = getNamedContacts();
+  for (const pattern of sendPatterns) {
+    const m = text.match(pattern);
+    if (m) {
+      const spoken = m[1].toLowerCase();
+      const found = namedContacts.find(c => c.name.toLowerCase() === spoken || c.name.toLowerCase().startsWith(spoken));
+      if (found) {
+        document.getElementById('item-partner-flag').checked = true;
+        toggleSendPanel(true);
+        setTimeout(() => selectInlineContact(found.name), 150);
+        text = text.replace(m[0], '');
+        matched.push('send to ' + found.name);
+      }
+      break;
+    }
+  }
+
+  text = text.replace(/\s{2,}/g,' ').replace(/^[,\s]+|[,\s]+$/g,'').trim();
+  if (text) text = text.charAt(0).toUpperCase() + text.slice(1);
+  document.getElementById('item-title').value = text;
+  if (matched.length) showToast('✨ Got it! Filled in: ' + matched.join(', '));
+}
+
+// ——— NOTIFICATIONS ———
 renderAll();
 if (settings.notifEnabled) scheduleNotification();
 </script>
