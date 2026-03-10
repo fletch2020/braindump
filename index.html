@@ -757,8 +757,7 @@ function renderAllItems() {
 
     const detail = `
       <div class="item-detail" id="detail-${item.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:2px dashed #d4cce8;">
-        ${item.date ? `<div class="item-meta" style="margin-bottom:4px;">📅 ${formatDate(item.date)}${item.time ? ' at ' + item.time : ''}</div>` : ''}
-        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:6px;">
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px;">
           <span class="item-tag tag-reminder">${item.date ? '⏰ Reminder' : '📌 Note'}</span>
           ${item.forPartner ? '<span class="item-tag tag-partner">💌 To share</span>' : ''}
           ${item.done ? '<span class="item-tag" style="background:#e8f5f0;color:#5b21b6;">✅ Done</span>' : ''}
