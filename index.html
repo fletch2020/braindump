@@ -1207,17 +1207,30 @@ function showCalPicker(id) {
   const popup = document.createElement('div');
   popup.id = 'cal-picker-popup';
   popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
-  popup.innerHTML = '<div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;">' +
-    '<div style="font-family:Righteous,cursive;font-size:1.3rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>' +
-    '<p style="color:#9575b5;font-size:0.88rem;margin-bottom:16px;">Opens straight in with everything filled — just tap Save!</p>' +
-    '<div style="display:flex;flex-direction:column;gap:10px;">' +
-    '<button onclick="addToGoogleCalendar(' + id + ');document.getElementById('cal-picker-popup').remove();" style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">📅 Google Calendar</button>' +
-    '<button onclick="addToAppleCalendar(' + id + ');document.getElementById('cal-picker-popup').remove();" style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">🍎 Apple Calendar</button>' +
-    '<button onclick="document.getElementById('cal-picker-popup').remove();" style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Cancel</button>' +
-    '</div></div>';
+  popup.innerHTML = `
+    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;">
+      <div style="font-family:Righteous,cursive;font-size:1.3rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>
+      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:16px;">Opens straight in with everything filled — just tap Save!</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="addToGoogleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
+          style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
+          📅 Google Calendar
+        </button>
+        <button onclick="addToAppleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
+          style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
+          🍎 Apple Calendar
+        </button>
+        <button onclick="document.getElementById('cal-picker-popup').remove();"
+          style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
+          Cancel
+        </button>
+      </div>
+    </div>`;
   document.body.appendChild(popup);
   popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
 }
+
+
 function buildGoogleCalUrl(title, notes, date, time) {
   const ds = date.replace(/-/g, '');
   let dates;
