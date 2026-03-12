@@ -1260,6 +1260,16 @@ function addToAppleCalendar(id) {
   document.body.appendChild(a); a.click(); setTimeout(()=>{document.body.removeChild(a);},1000);
 }
 
+// addToCalendar — shows picker for item cards
+function addToCalendar(id) { showCalPicker(id); }
+
+// Legacy inline send panel helpers (used in voice parsing)
+function renderInlineQuickContacts() { renderAddContactBtns(); }
+function selectInlineContact(name) {
+  const c = (settings.contacts||[]).find(c => c.name===name);
+  if (c) selectAddContact(c.name, c.phone||'');
+}
+
 renderAll();
 if (settings.notifEnabled) scheduleNotification();
 </script>
