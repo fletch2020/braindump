@@ -376,15 +376,13 @@
 
   /* CLEAR INPUT BUTTON */
   .clear-input-btn {
-    width: 48px; height: 48px; flex-shrink: 0;
-    background: #e53935; color: white;
-    border: none; border-radius: 12px;
-    font-size: 1.3rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; box-shadow: 0 3px 8px rgba(229,57,53,0.3);
+    background: none; border: none;
+    font-size: 1.4rem; cursor: pointer;
+    padding: 4px; color: #e53935;
+    flex-shrink: 0; line-height: 1;
+    transition: opacity 0.2s;
   }
-  .clear-input-btn:hover { background: #c62828; transform: translateY(-1px); }
-  .clear-input-btn:active { transform: scale(0.95); }
+  .clear-input-btn:hover { opacity: 0.7; }
 
   /* VOICE BUTTON */
   .voice-btn {
