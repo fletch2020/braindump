@@ -377,7 +377,7 @@
   /* CLEAR INPUT BUTTON */
   .clear-input-btn {
     background: none; border: none;
-    font-size: 1.4rem; cursor: pointer;
+    font-size: 1.5rem; font-weight: 900; cursor: pointer;
     padding: 4px; color: #e53935;
     flex-shrink: 0; line-height: 1;
     transition: opacity 0.2s;
@@ -521,7 +521,7 @@
           <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
           <button id="voice-btn" onclick="toggleVoice()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px; line-height:1;" title="Tap to speak">🎤</button>
         </div>
-        <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" class="clear-input-btn" title="Clear">🗑</button>
+        <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" class="clear-input-btn" title="Clear">✕</button>
       </div>
       <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:800; text-align:center;">🔴 Listening — speak now...</div>
       <div id="voice-unsupported" style="display:none; font-size:0.8rem; color:var(--muted);">⚠️ Voice not supported — try Chrome or Safari.</div>
