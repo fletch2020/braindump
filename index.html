@@ -507,7 +507,7 @@
 
       <!-- TEXT INPUT + MIC -->
       <div style="position:relative;">
-        <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;">
+        <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
         <button id="voice-btn" onclick="toggleVoice()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px;" title="Tap to speak">🎤</button>
       </div>
       <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:800; text-align:center;">🔴 Listening — speak now...</div>
@@ -518,9 +518,15 @@
         <button onclick="toggleDatePanel()" id="date-toggle-btn" style="background:none; border:none; color:var(--muted); font-family:'Nunito',sans-serif; font-weight:800; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:6px;">
           📅 <span id="date-toggle-label">Add date &amp; time (optional)</span>
         </button>
-        <div id="date-panel" style="display:none; margin-top:10px; display:none; gap:10px; flex-wrap:wrap;">
+        <div id="date-panel" style="display:none; margin-top:10px; gap:10px; flex-wrap:wrap;">
           <input type="date" id="item-date" onchange="updateDateLabel(); updateCalBtn();" style="flex:1; min-width:140px;">
-          <input type="time" id="item-time" onchange="updateDateLabel();" style="flex:1; min-width:120px;">
+          <input type="time" id="item-time" onchange="updateDateLabel(); suggestRemindTime(this.value);" style="flex:1; min-width:120px;">
+          <div style="width:100%; display:flex; align-items:center; gap:10px; margin-top:4px;">
+            <label style="font-size:0.8rem; color:var(--muted); font-weight:800; white-space:nowrap;">🔔 Remind me at</label>
+            <input type="time" id="item-remind-time" style="flex:1;" placeholder="e.g. 18:30">
+            <button onclick="clearRemindTime()" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;" title="Clear">✕</button>
+          </div>
+          <div id="remind-suggestion" style="display:none; width:100%; font-size:0.78rem; color:var(--accent1); font-weight:800;"></div>
         </div>
       </div>
 
@@ -720,6 +726,7 @@ function renderAllItems() {
 
     const detail = `
       <div class="item-detail" id="detail-${item.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:2px dashed #c2d9ce;">
+        ${item.remindTime ? `<div style="font-size:0.8rem;color:var(--accent1);font-weight:800;margin-bottom:6px;">🔔 Reminder set for ${item.remindTime}</div>` : ''}
         <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px;">
           <span class="item-tag tag-reminder">${item.date ? '⏰ Reminder' : '📌 Note'}</span>
           ${item.forPartner ? '<span class="item-tag tag-partner">💌 To share</span>' : ''}
@@ -867,6 +874,7 @@ function buildItemFromForm() {
     notes: '',
     date: document.getElementById('item-date').value,
     time: document.getElementById('item-time').value,
+    remindTime: document.getElementById('item-remind-time').value,
     preReminds: [],
     forPartner: !!selectedContact,
     done: false,
@@ -878,6 +886,8 @@ function clearAddForm() {
   document.getElementById('item-title').value = '';
   document.getElementById('item-date').value = '';
   document.getElementById('item-time').value = '';
+  document.getElementById('item-remind-time').value = '';
+  document.getElementById('remind-suggestion').style.display = 'none';
   document.getElementById('date-panel').style.display = 'none';
   document.getElementById('date-toggle-label').textContent = 'Add date & time (optional)';
   document.getElementById('date-toggle-label').style.color = '';
@@ -907,6 +917,7 @@ function saveOnlyItem() {
   const item = buildItemFromForm();
   if (!item) return;
   items.unshift(item); save();
+  scheduleItemReminder(item);
   clearAddForm(); showTab('today');
   showToast('✅ Saved!');
 }
@@ -1046,9 +1057,10 @@ function parseVoiceTranscript(transcript) {
     let h=parseInt(tm[1]), m=tm[2]?parseInt(tm[2]):0;
     const ap=tm[3]?tm[3].toLowerCase():null;
     if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<7)h+=12;
-    document.getElementById('item-time').value = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    const detTime = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    document.getElementById('item-time').value = detTime;
     document.getElementById('date-panel').style.display='flex';
-    text=text.replace(tm[0],''); matched.push('time'); updateDateLabel();
+    text=text.replace(tm[0],''); matched.push('time'); updateDateLabel(); suggestRemindTime(detTime);
   }
 
   // Contact detection
@@ -1276,7 +1288,61 @@ function addToAppleCalendar(id) {
   document.body.appendChild(a); a.click(); setTimeout(()=>{document.body.removeChild(a);},1000);
 }
 
-// addToCalendar — shows picker for item cards
+// ——— SMART TEXT PARSING (typed or voice) ———
+let parseTimer = null;
+function parseTypedInput(val) {
+  // Debounce — only parse after user stops typing for 800ms
+  clearTimeout(parseTimer);
+  parseTimer = setTimeout(() => parseVoiceTranscript(val), 800);
+}
+
+function clearRemindTime() {
+  document.getElementById('item-remind-time').value = '';
+  document.getElementById('remind-suggestion').style.display = 'none';
+}
+
+function suggestRemindTime(eventTime) {
+  // Suggest 30 mins before the event time
+  if (!eventTime) return;
+  const [h, m] = eventTime.split(':').map(Number);
+  let rh = h, rm = m - 30;
+  if (rm < 0) { rm += 60; rh -= 1; }
+  if (rh < 0) return;
+  const suggested = String(rh).padStart(2,'0') + ':' + String(rm).padStart(2,'0');
+  // Only auto-fill if not already set
+  const remindEl = document.getElementById('item-remind-time');
+  const suggEl = document.getElementById('remind-suggestion');
+  if (!remindEl.value) {
+    remindEl.value = suggested;
+    if (suggEl) {
+      suggEl.textContent = "💡 Suggested 30 mins before — change it if you like!";
+      suggEl.style.display = 'block';
+    }
+  }
+}
+
+// ——— INDIVIDUAL ITEM REMINDERS ———
+function scheduleItemReminder(item) {
+  if (!item.remindTime || !item.date) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const [h, m] = item.remindTime.split(':').map(Number);
+  const target = new Date(item.date + 'T' + item.remindTime + ':00');
+  const delay = target - new Date();
+  if (delay <= 0) return; // already passed
+  setTimeout(() => {
+    new Notification("🧠 Don't Forget!", {
+      body: item.title + (item.time ? ' — at ' + item.time : ''),
+      icon: '/favicon.ico'
+    });
+  }, delay);
+}
+
+function scheduleAllReminders() {
+  items.forEach(item => { if (!item.done) scheduleItemReminder(item); });
+}
+
+// ——— addToCalendar — shows picker for item cards
+
 function addToCalendar(id) { showCalPicker(id); }
 
 // Legacy inline send panel helpers (used in voice parsing)
@@ -1288,6 +1354,7 @@ function selectInlineContact(name) {
 
 renderAll();
 if (settings.notifEnabled) scheduleNotification();
+scheduleAllReminders();
 </script>
 </body>
 </html>
