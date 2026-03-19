@@ -374,6 +374,18 @@
   .contact-select-btn:hover { border-color: var(--accent1); }
   .contact-select-btn.selected { background: var(--accent1); color: white; border-color: var(--accent1); }
 
+  /* CLEAR INPUT BUTTON */
+  .clear-input-btn {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: #e53935; color: white;
+    border: none; border-radius: 12px;
+    font-size: 1.3rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; box-shadow: 0 3px 8px rgba(229,57,53,0.3);
+  }
+  .clear-input-btn:hover { background: #c62828; transform: translateY(-1px); }
+  .clear-input-btn:active { transform: scale(0.95); }
+
   /* VOICE BUTTON */
   .voice-btn {
     width: 100%;
@@ -506,12 +518,12 @@
     <div class="card" style="display:flex; flex-direction:column; gap:14px;">
 
       <!-- TEXT INPUT + MIC -->
-      <div style="position:relative;">
-        <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 80px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
-        <div style="position:absolute; right:8px; top:50%; transform:translateY(-50%); display:flex; gap:2px; align-items:center;">
-          <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" style="background:none;border:none;font-size:1.1rem;cursor:pointer;padding:4px;color:var(--muted);line-height:1;" title="Clear">✕</button>
-          <button id="voice-btn" onclick="toggleVoice()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px;line-height:1;" title="Tap to speak">🎤</button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="position:relative; flex:1;">
+          <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
+          <button id="voice-btn" onclick="toggleVoice()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px; line-height:1;" title="Tap to speak">🎤</button>
         </div>
+        <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" class="clear-input-btn" title="Clear">🗑</button>
       </div>
       <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:800; text-align:center;">🔴 Listening — speak now...</div>
       <div id="voice-unsupported" style="display:none; font-size:0.8rem; color:var(--muted);">⚠️ Voice not supported — try Chrome or Safari.</div>
