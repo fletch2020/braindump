@@ -575,7 +575,33 @@
     <div class="card">
       <h2>👥 Your 5 Quick Contacts</h2>
       <p style="color:var(--muted); font-size:0.85rem; margin-bottom:16px;">Save up to 5 people you message regularly. Their names appear as quick-tap buttons whenever you flag something to share — no typing needed!</p>
-      <div id="contacts-settings-list"></div>
+      <div id="contacts-settings-list">
+        <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
+          <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">1</span>
+          <input type="text" id="contact-name-1" placeholder="Name" style="flex:1;">
+          <input type="tel" id="contact-phone-1" placeholder="07911123456" style="flex:2;">
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
+          <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">2</span>
+          <input type="text" id="contact-name-2" placeholder="Name" style="flex:1;">
+          <input type="tel" id="contact-phone-2" placeholder="07911123456" style="flex:2;">
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
+          <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">3</span>
+          <input type="text" id="contact-name-3" placeholder="Name" style="flex:1;">
+          <input type="tel" id="contact-phone-3" placeholder="07911123456" style="flex:2;">
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
+          <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">4</span>
+          <input type="text" id="contact-name-4" placeholder="Name" style="flex:1;">
+          <input type="tel" id="contact-phone-4" placeholder="07911123456" style="flex:2;">
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
+          <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">5</span>
+          <input type="text" id="contact-name-5" placeholder="Name" style="flex:1;">
+          <input type="tel" id="contact-phone-5" placeholder="07911123456" style="flex:2;">
+        </div>
+      </div>
       <p style="font-size:0.78rem; color:var(--muted); margin-top:10px;">💡 <strong>Phone format:</strong> Either 07911123456 or +447911123456 both work fine!</p>
       <button class="btn btn-primary btn-sm" onclick="saveContacts()" style="margin-top:8px;">💾 Save Contacts</button>
     </div>
@@ -1116,6 +1142,23 @@ function dismissBanner() {
 function closeIosModal() { document.getElementById('iosModal').style.display = 'none'; }
 
 // ——— NOTIFICATIONS ———
+function toggleNotifications() {
+  const enabled = document.getElementById('notif-toggle').checked;
+  settings.notifEnabled = enabled;
+  persistSettings();
+  if (enabled) {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') { scheduleNotification(); showToast('🔔 Evening reminders on!'); }
+      else { showToast('Permission denied — check browser settings'); document.getElementById('notif-toggle').checked = false; settings.notifEnabled = false; persistSettings(); }
+    });
+  } else { showToast('🔕 Evening reminders off'); }
+}
+
+function saveSettingsSilent() {
+  settings.notifTime = document.getElementById('notif-time').value;
+  persistSettings();
+}
+
 function scheduleNotification() {
   if (!('Notification' in window)) return;
   const [h, m] = (settings.notifTime || '19:00').split(':').map(Number);
@@ -1141,8 +1184,10 @@ function testNotification() {
 
 // ——— SETTINGS ———
 function loadSettings() {
-  const el = document.getElementById('notif-time');
-  if (el) el.value = settings.notifTime || '19:00';
+  const timeEl = document.getElementById('notif-time');
+  if (timeEl) timeEl.value = settings.notifTime || '19:00';
+  const toggleEl = document.getElementById('notif-toggle');
+  if (toggleEl) toggleEl.checked = !!settings.notifEnabled;
 }
 function saveContacts() {
   const contacts = [];
