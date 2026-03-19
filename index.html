@@ -507,8 +507,11 @@
 
       <!-- TEXT INPUT + MIC -->
       <div style="position:relative;">
-        <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
-        <button id="voice-btn" onclick="toggleVoice()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px;" title="Tap to speak">🎤</button>
+        <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 80px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
+        <div style="position:absolute; right:8px; top:50%; transform:translateY(-50%); display:flex; gap:2px; align-items:center;">
+          <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" style="background:none;border:none;font-size:1.1rem;cursor:pointer;padding:4px;color:var(--muted);line-height:1;" title="Clear">✕</button>
+          <button id="voice-btn" onclick="toggleVoice()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px;line-height:1;" title="Tap to speak">🎤</button>
+        </div>
       </div>
       <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:800; text-align:center;">🔴 Listening — speak now...</div>
       <div id="voice-unsupported" style="display:none; font-size:0.8rem; color:var(--muted);">⚠️ Voice not supported — try Chrome or Safari.</div>
