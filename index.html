@@ -522,10 +522,12 @@ function updateDateLabel() {
 function buildItemFromForm() {
   const title = (document.getElementById('item-title').value || '').trim();
   if (!title) { showToast('Please enter something first!'); return null; }
+  const remindEl = document.getElementById('item-remind-time');
   return { id: Date.now(), type: 'reminder', title, notes: '',
     date: document.getElementById('item-date').value,
     time: document.getElementById('item-time').value,
-    remindTime: document.getElementById('item-remind-time').value,
+    remindTime: remindEl.value,
+    remindDate: remindEl.dataset.remindDate || '',
     preReminds: [], forPartner: !!selectedContact, done: false, created: new Date().toISOString() };
 }
 
@@ -533,7 +535,7 @@ function clearAddForm() {
   document.getElementById('item-title').value = '';
   document.getElementById('item-date').value = '';
   document.getElementById('item-time').value = '';
-  document.getElementById('item-remind-time').value = '';
+  const remindElC = document.getElementById('item-remind-time'); remindElC.value = ''; remindElC.dataset.remindDate = '';
   document.getElementById('remind-suggestion').style.display = 'none';
   document.getElementById('date-panel').style.display = 'none';
   document.getElementById('date-toggle-label').textContent = 'Add date & time (optional)';
@@ -562,29 +564,43 @@ function saveSendWhatsApp() {
 function showSendPreview(item, contact, withCal) {
   const existing = document.getElementById('send-preview-popup');
   if (existing) existing.remove();
+  // Store safely as window variables — avoids any quoting/escaping issues
+  window._pendingItem = item;
+  window._pendingContact = contact;
+  window._pendingWithCal = withCal;
   const msg = buildWhatsAppMsg(item, contact);
   const popup = document.createElement('div');
   popup.id = 'send-preview-popup';
   popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
-  popup.innerHTML = '<div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:420px;">' +
-    '<div style="font-family:Righteous,cursive;font-size:1.2rem;color:var(--accent1);margin-bottom:12px;">📱 Message Preview</div>' +
-    '<div style="background:#e8f5e9;border-radius:12px;padding:14px;font-size:0.9rem;color:#1a1a1a;white-space:pre-wrap;margin-bottom:16px;line-height:1.5;">' + msg + '</div>' +
+  const div = document.createElement('div');
+  div.style.cssText = 'background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:420px;';
+  div.innerHTML = '<div style="font-family:Righteous,cursive;font-size:1.2rem;color:var(--accent1);margin-bottom:12px;">📱 Message Preview</div>' +
+    '<div style="background:#e8f5e9;border-radius:12px;padding:14px;font-size:0.9rem;color:#1a1a1a;white-space:pre-wrap;margin-bottom:16px;line-height:1.5;"></div>' +
     '<p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Sending to <strong>' + contact.name + '</strong> — looks right?</p>' +
     '<div style="display:flex;flex-direction:column;gap:8px;">' +
-    '<button onclick="confirmSend(' + JSON.stringify(JSON.stringify(item)) + ', ' + JSON.stringify(JSON.stringify(contact)) + ', ' + withCal + ')" style="background:var(--accent1);color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Yes, send it!</button>' +
-    '<button onclick="document.getElementById(\'send-preview-popup\').remove();" style="background:#ede9f8;color:var(--accent1);border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">✏️ Edit first</button>' +
-    '</div></div>';
+    '<button id="confirm-send-btn" style="background:var(--accent1);color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Yes, send it!</button>' +
+    '<button id="cancel-send-btn" style="background:#ede9f8;color:var(--accent1);border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">✏️ Edit first</button>' +
+    '</div>';
+  // Set message text safely (not via innerHTML to avoid XSS)
+  div.querySelector('div:nth-child(2)').textContent = msg;
+  popup.appendChild(div);
   document.body.appendChild(popup);
+  document.getElementById('confirm-send-btn').onclick = () => confirmSend();
+  document.getElementById('cancel-send-btn').onclick = () => popup.remove();
   popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
 }
 
-function confirmSend(itemJson, contactJson, withCal) {
-  document.getElementById('send-preview-popup').remove();
-  const item = JSON.parse(itemJson), contact = JSON.parse(contactJson);
+function confirmSend() {
+  const item = window._pendingItem, contact = window._pendingContact, withCal = window._pendingWithCal;
+  const popup = document.getElementById('send-preview-popup');
+  if (popup) popup.remove();
+  if (!item || !contact) { showToast('Something went wrong — please try again'); return; }
   items.unshift(item); save();
+  scheduleItemReminder(item);
   const msg = buildWhatsAppMsg(item, contact);
   window.open(buildWhatsAppUrl(contact.phone, msg), '_blank');
   if (withCal) setTimeout(() => showCalPicker(item.id), 600);
+  window._pendingItem = null; window._pendingContact = null;
   clearAddForm(); showTab('today');
   showToast('✅ Saved & sent to ' + contact.name + '!');
 }
@@ -668,29 +684,116 @@ function parseDateTimeOnly(text) {
 }
 
 function parseVoiceTranscript(transcript) {
-  let text = transcript, matched = []; const today = new Date(); let detectedDate = null;
-  if (/\btoday\b/i.test(text)) { detectedDate = new Date(); text = text.replace(/\btoday\b/i, ''); matched.push('date'); }
-  else if (/\btomorrow\b/i.test(text)) { detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1); text = text.replace(/\btomorrow\b/i, ''); matched.push('date'); }
+  let text = transcript, matched = [];
+  const today = new Date();
+
+  // ——— REMINDER PHRASE DETECTION (before main date) ———
+  // "remind me on thursday at 6pm" / "remind me at 6:30"
+  let remindDate = null, remindTime = null;
+
+  const remindOnPattern = /remind\s+me\s+on\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday|today|tomorrow)\s+at\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i;
+  const remindAtPattern = /remind\s+me\s+at\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i;
+
+  const rom = text.match(remindOnPattern);
+  if (rom) {
+    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const dayStr = rom[1].toLowerCase();
+    if (dayStr === 'today') { remindDate = new Date(); }
+    else if (dayStr === 'tomorrow') { remindDate = new Date(); remindDate.setDate(remindDate.getDate()+1); }
+    else { const t=days.indexOf(dayStr), d=new Date(); let diff=(t-d.getDay()+7)%7; if(!diff)diff=7; d.setDate(d.getDate()+diff); remindDate=d; }
+    let rh=parseInt(rom[2]), rm=rom[3]?parseInt(rom[3]):0;
+    const ap=rom[4]?rom[4].toLowerCase():null;
+    if(ap==='pm'&&rh<12)rh+=12; if(ap==='am'&&rh===12)rh=0; if(!ap&&rh<7)rh+=12;
+    remindTime = String(rh).padStart(2,'0')+':'+String(rm).padStart(2,'0');
+    text = text.replace(rom[0],''); matched.push('reminder at '+remindTime);
+  } else {
+    const ram = text.match(remindAtPattern);
+    if (ram) {
+      let rh=parseInt(ram[1]), rm=ram[2]?parseInt(ram[2]):0;
+      const ap=ram[3]?ram[3].toLowerCase():null;
+      if(ap==='pm'&&rh<12)rh+=12; if(ap==='am'&&rh===12)rh=0; if(!ap&&rh<7)rh+=12;
+      remindTime = String(rh).padStart(2,'0')+':'+String(rm).padStart(2,'0');
+      text = text.replace(ram[0],''); matched.push('reminder at '+remindTime);
+    }
+  }
+
+  // ——— MAIN DATE DETECTION ———
+  let detectedDate = null;
+  if (/today/i.test(text)) { detectedDate = new Date(); text = text.replace(/today/i, ''); matched.push('date'); }
+  else if (/tomorrow/i.test(text)) { detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1); text = text.replace(/tomorrow/i, ''); matched.push('date'); }
   else {
     const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-    const nx = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+    const nx = text.match(/next\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i);
     if (nx) { const t=days.indexOf(nx[1].toLowerCase()),d=new Date(); d.setDate(d.getDate()+((t-d.getDay()+7)%7||7)+7); detectedDate=d; text=text.replace(nx[0],''); matched.push('date'); }
-    else { const th=text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i); if(th){const t=days.indexOf(th[1].toLowerCase()),d=new Date();let diff=(t-d.getDay()+7)%7;if(!diff)diff=7;d.setDate(d.getDate()+diff);detectedDate=d;text=text.replace(th[0],'');matched.push('date');} }
+    else {
+      const th = text.match(/(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i);
+      if (th) { const t=days.indexOf(th[1].toLowerCase()),d=new Date(); let diff=(t-d.getDay()+7)%7; if(!diff)diff=7; d.setDate(d.getDate()+diff); detectedDate=d; text=text.replace(th[0],''); matched.push('date'); }
+    }
   }
   if (!detectedDate) {
     const months=['january','february','march','april','may','june','july','august','september','october','november','december'];
-    const dm=text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)||text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    const dm=text.match(/(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)/i)||text.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)/i);
     if(dm){let day,mon;if(months.includes(dm[1].toLowerCase())){mon=dm[1];day=dm[2];}else{day=dm[1];mon=dm[2];}const d=new Date(today.getFullYear(),months.indexOf(mon.toLowerCase()),parseInt(day));if(d<today)d.setFullYear(d.getFullYear()+1);detectedDate=d;text=text.replace(dm[0],'');matched.push('date');}
   }
   if (detectedDate) {
     const yyyy=detectedDate.getFullYear(),mm=String(detectedDate.getMonth()+1).padStart(2,'0'),dd=String(detectedDate.getDate()).padStart(2,'0');
     document.getElementById('date-panel').style.display='flex';
-    document.getElementById('item-date').value=yyyy+'-'+mm+'-'+dd; updateDateLabel();
+    document.getElementById('item-date').value=yyyy+'-'+mm+'-'+dd;
+    updateDateLabel();
   }
-  const tm=text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
-  if(tm){let h=parseInt(tm[1]),m=tm[2]?parseInt(tm[2]):0;const ap=tm[3]?tm[3].toLowerCase():null;if(ap==='pm'&&h<12)h+=12;if(ap==='am'&&h===12)h=0;if(!ap&&h<7)h+=12;const detTime=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');document.getElementById('item-time').value=detTime;document.getElementById('date-panel').style.display='flex';text=text.replace(tm[0],'');matched.push('time');updateDateLabel();suggestRemindTime(detTime);}
-  const sendPat=/\b(?:send\s+to|tell|message|remind|text|whatsapp)\s+(\w+)\b/i,sm=text.match(sendPat);
+
+  // ——— MAIN TIME DETECTION ("at Xpm" / "at X:XX") ———
+  const tm=text.match(/at\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+  if(tm){
+    let h=parseInt(tm[1]),m=tm[2]?parseInt(tm[2]):0;
+    const ap=tm[3]?tm[3].toLowerCase():null;
+    if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<7)h+=12;
+    const detTime=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    document.getElementById('item-time').value=detTime;
+    document.getElementById('date-panel').style.display='flex';
+    text=text.replace(tm[0],''); matched.push('time'); updateDateLabel();
+    // If no explicit remind time, suggest 30 mins before
+    if (!remindTime) suggestRemindTime(detTime);
+  } else {
+    // Half past / quarter past / quarter to
+    const wordNums={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
+    const ph=s=>isNaN(s)?(wordNums[s.toLowerCase()]||0):parseInt(s);
+    const hp=text.match(/half\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)/i);
+    const qp=text.match(/quarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)/i);
+    const qt=text.match(/quarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)/i);
+    let detTime=null;
+    if(hp){let h=ph(hp[1]);if(h<7)h+=12;detTime=String(h).padStart(2,'0')+':30';text=text.replace(hp[0],'');}
+    else if(qp){let h=ph(qp[1]);if(h<7)h+=12;detTime=String(h).padStart(2,'0')+':15';text=text.replace(qp[0],'');}
+    else if(qt){let h=ph(qt[1])-1;if(h<7)h+=12;detTime=String(h).padStart(2,'0')+':45';text=text.replace(qt[0],'');}
+    if(detTime){
+      document.getElementById('item-time').value=detTime;
+      document.getElementById('date-panel').style.display='flex';
+      matched.push('time'); updateDateLabel();
+      if (!remindTime) suggestRemindTime(detTime);
+    }
+  }
+
+  // ——— SET REMIND TIME ———
+  if (remindTime) {
+    document.getElementById('date-panel').style.display='flex';
+    document.getElementById('item-remind-time').value = remindTime;
+    // If remind has a specific date, set that too
+    if (remindDate) {
+      const yyyy=remindDate.getFullYear(),mm=String(remindDate.getMonth()+1).padStart(2,'0'),dd=String(remindDate.getDate()).padStart(2,'0');
+      // Only set remind date field if it differs from event date
+      // Store it as a note in the remindTime for now — the notification uses item.date + item.remindTime
+      // So if they say "remind me thursday" and event is friday, we need a separate remindDate
+      // For now store as data attr and use in scheduleItemReminder
+      document.getElementById('item-remind-time').dataset.remindDate = yyyy+'-'+mm+'-'+dd;
+    }
+    const suggEl=document.getElementById('remind-suggestion');
+    if(suggEl){suggEl.textContent='🔔 Reminder set!';suggEl.style.display='block';}
+  }
+
+  // ——— CONTACT DETECTION ———
+  const sendPat=/(?:send\s+to|tell|message|remind|text|whatsapp)\s+(\w+)/i,sm=text.match(sendPat);
   if(sm){const spoken=sm[1].toLowerCase();const found=(settings.contacts||[]).find(c=>c.name&&(c.name.toLowerCase()===spoken||c.name.toLowerCase().startsWith(spoken)));if(found){selectAddContact(found.name,found.phone||'');text=text.replace(sm[0],'');matched.push('send to '+found.name);}}
+
   text=text.replace(/\s{2,}/g,' ').replace(/^[,\s]+|[,\s]+$/g,'').trim();
   if(text)text=text.charAt(0).toUpperCase()+text.slice(1);
   document.getElementById('item-title').value=text;
@@ -709,9 +812,12 @@ function suggestRemindTime(eventTime) {
 }
 
 function scheduleItemReminder(item) {
-  if(!item.remindTime||!item.date) return;
+  if(!item.remindTime) return;
   if(!('Notification' in window)||Notification.permission!=='granted') return;
-  const target=new Date(item.date+'T'+item.remindTime+':00'), delay=target-new Date();
+  // Use remindDate if set, otherwise use item.date
+  const dateToUse = item.remindDate || item.date;
+  if (!dateToUse) return;
+  const target=new Date(dateToUse+'T'+item.remindTime+':00'), delay=target-new Date();
   if(delay<=0) return;
   setTimeout(()=>{ new Notification("🧠 Don't Forget!",{body:item.title+(item.time?' — at '+item.time:'')});},delay);
 }
