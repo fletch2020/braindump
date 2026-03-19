@@ -26,418 +26,113 @@
     --radius: 18px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    background-image: radial-gradient(circle at 20% 20%, #ede9f8 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, #e9d8fd 0%, transparent 50%);
-  }
-
-  /* INSTALL BANNER */
-  .install-banner {
-    display: none;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: white;
-    padding: 14px 20px;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    box-shadow: 0 4px 20px rgba(193,127,36,0.2);
-  }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; background-image: radial-gradient(circle at 20% 20%, #ede9f8 0%, transparent 50%), radial-gradient(circle at 80% 80%, #e9d8fd 0%, transparent 50%); }
+  .install-banner { display: none; background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; padding: 14px 20px; text-align: center; position: sticky; top: 0; z-index: 200; }
   .install-banner p { font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; }
   .install-banner .install-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .install-btn-main {
-    background: #f3f0fa; color: white;
-    border: none; border-radius: 50px;
-    padding: 9px 20px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .install-btn-main:hover { transform: scale(1.03); }
-  .install-btn-dismiss {
-    background: rgba(255,255,255,0.2); color: white;
-    border: 2px solid rgba(255,255,255,0.5); border-radius: 50px;
-    padding: 9px 16px;
-    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
-    cursor: pointer;
-  }
-
-  /* IOS MODAL */
-  .ios-modal {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000; align-items: flex-end; justify-content: center; padding: 20px;
-  }
+  .install-btn-main { background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50px; padding: 9px 20px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; cursor: pointer; }
+  .install-btn-dismiss { background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 9px 16px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+  .ios-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; padding: 20px; }
   .ios-modal.open { display: flex; }
-  .ios-box { 
-    background: #f3f0fa; border-radius: 20px; padding: 28px 24px;
-    max-width: 400px; width: 100%;
-    animation: slideUp 0.3s ease; text-align: center;
-  }
+  .ios-box { background: #f3f0fa; border-radius: 20px; padding: 28px 24px; max-width: 400px; width: 100%; animation: slideUp 0.3s ease; text-align: center; }
   .ios-box h3 { font-family: 'Righteous', cursive; font-size: 1.8rem; color: var(--accent1); margin-bottom: 8px; }
   .ios-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
   .ios-steps { text-align: left; background: var(--bg); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
   .ios-step { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #ede9f8; font-size: 0.9rem; font-weight: 600; }
   .ios-step:last-child { border-bottom: none; }
   .ios-step-num { background: var(--accent1); color: white; border-radius: 50%; width: 26px; height: 26px; min-width: 26px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.8rem; }
-
-  .notification-bar {
-    background: var(--accent1); color: #f3f0fa;
-    text-align: center; padding: 10px 20px;
-    font-weight: 700; font-size: 0.9rem;
-    display: none; position: sticky; top: 0; z-index: 100;
-    border-bottom: 3px solid var(--accent3);
-  }
-
-  header {
-    padding: 16px 20px 10px;
-    background: var(--accent1);
-    border-bottom: 3px solid var(--accent4);
-  }
-  header h1 { color: #faf8fd !important; }
-  .install-header-btn { background: rgba(255,255,255,0.2) !important; color: white !important; border-color: rgba(255,255,255,0.3) !important; }
-  header h1 {
-    font-family: 'Righteous', cursive;
-    font-size: 1.6rem;
-    color: var(--accent1);
-    line-height: 1;
-    margin: 0;
-  }
-
-  .install-header-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 12px;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: white; border: none; border-radius: 50px;
-    padding: 10px 24px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(193,127,36,0.15);
-    transition: all 0.2s;
-  }
-  .install-header-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.20); }
+  .notification-bar { background: var(--accent1); color: #f3f0fa; text-align: center; padding: 10px 20px; font-weight: 700; font-size: 0.9rem; display: none; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent3); }
+  header { padding: 16px 20px 10px; background: var(--accent1); border-bottom: 3px solid var(--accent4); }
+  header h1 { font-family: 'Righteous', cursive; font-size: 1.6rem; color: #faf8fd; line-height: 1; margin: 0; }
+  .install-header-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; padding: 6px 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
   .install-header-btn.hidden { display: none; }
-
-      .tabs {
-    display: flex; justify-content: stretch;
-    background: var(--accent4);
-    border-bottom: none;
-    padding: 0;
-  }
-  .tab-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 3px; padding: 10px 4px 8px;
-    border: none; border-bottom: 3px solid transparent;
-    background: transparent; color: rgba(255,255,255,0.65);
-    font-family: 'Nunito', sans-serif; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-  }
+  .tabs { display: flex; justify-content: stretch; background: var(--accent4); border-bottom: none; padding: 0; }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 4px 8px; border: none; border-bottom: 3px solid transparent; background: transparent; color: rgba(255,255,255,0.65); font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .tab-icon { font-size: 1.2rem; line-height: 1; pointer-events: none; }
   .tab-label { font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; pointer-events: none; }
-    .tab-btn.active { color: white; border-bottom-color: var(--accent3); background: rgba(255,255,255,0.1); }
-  .tab-btn-add .tab-icon {
-    width: 32px; height: 32px; background: var(--accent1); color: white;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem; font-weight: 900; line-height: 1;
-  }
+  .tab-btn.active { color: white; border-bottom-color: var(--accent3); background: rgba(255,255,255,0.1); }
+  .tab-btn-add .tab-icon { width: 32px; height: 32px; background: var(--accent1); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; line-height: 1; }
   .tab-btn-add.active .tab-icon { background: var(--accent4); }
-
-
   .container { max-width: 680px; margin: 0 auto; padding: 0 20px 40px; }
   .panel { display: none; }
   .panel.active { display: block; }
-
-  .card {
-    background: var(--card); border-radius: var(--radius);
-    padding: 24px; margin-bottom: 20px;
-    box-shadow: var(--shadow); border: 2px solid #ede9f8;
-  }
+  .card { background: var(--card); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow); border: 2px solid #ede9f8; }
   .card h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-
-  input[type="text"], input[type="date"], input[type="time"], textarea {
-    width: 100%; padding: 12px 16px;
-    border: 2px solid #ede9f8; border-radius: 12px;
-    font-family: 'Nunito', sans-serif; font-size: 0.95rem;
-    background: #f3f0fa; color: var(--text);
-    margin-bottom: 12px; transition: border-color 0.2s; outline: none;
-  }
+  input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px 16px; border: 2px solid #ede9f8; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; background: #f3f0fa; color: var(--text); margin-bottom: 12px; transition: border-color 0.2s; outline: none; }
   input:focus, textarea:focus { border-color: var(--accent1); }
-  textarea { min-height: 80px; resize: vertical; }
-
-  label {
-    font-weight: 700; font-size: 0.85rem; color: var(--muted);
-    display: block; margin-bottom: 4px;
-    text-transform: uppercase; letter-spacing: 0.05em;
-  }
+  label { font-weight: 700; font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
   .form-group { margin-bottom: 4px; }
-
-  .btn {
-    padding: 13px 28px; border: none; border-radius: 50px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
-    cursor: pointer; transition: all 0.2s;
-    display: inline-flex; align-items: center; gap: 8px;
-  }
+  .btn { padding: 13px 28px; border: none; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
   .btn-primary { background: var(--highlight); color: white; box-shadow: 0 4px 14px rgba(124,58,237,0.20); }
-  .btn-primary:hover { background: var(--accent4); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(193,127,36,0.15); }
+  .btn-primary:hover { background: var(--accent4); transform: translateY(-1px); }
   .btn-secondary { background: var(--accent4); color: white; }
   .btn-secondary:hover { background: var(--accent4); transform: translateY(-1px); }
-  .btn-partner { background: var(--accent2); color: var(--text); }
-  .btn-partner:hover { background: #a855f7; transform: translateY(-1px); }
   .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
   .btn-danger { background: #f3f0fa; color: var(--accent1); }
   .btn-danger:hover { background: var(--accent1); color: white; }
-
   .items-list { display: flex; flex-direction: column; gap: 12px; }
-  .item-card {
-    background: #f3f0fa; border-radius: 14px;
-    padding: 16px 18px; border: 2px solid #ede9f8;
-    display: flex; align-items: flex-start; gap: 14px;
-    transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer;
-  }
+  .item-card { background: #f3f0fa; border-radius: 14px; padding: 16px 18px; border: 2px solid #ede9f8; display: flex; align-items: flex-start; gap: 14px; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer; }
   .item-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
   .item-card.type-note::before { background: var(--accent4); }
   .item-card.type-reminder::before { background: var(--accent1); }
-  .item-card.type-partner::before { background: var(--accent2); }
   .item-card.done { opacity: 0.5; }
   .item-card.done .item-title { text-decoration: line-through; }
-
   .item-icon { font-size: 1.6rem; flex-shrink: 0; }
   .item-body { flex: 1; min-width: 0; }
   .item-title { font-weight: 700; font-size: 1rem; margin-bottom: 3px; }
   .item-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 2px; }
-  .item-tag {
-    display: inline-block; padding: 2px 10px; border-radius: 50px;
-    font-size: 0.72rem; font-weight: 800; margin-top: 6px;
-    text-transform: uppercase; letter-spacing: 0.04em;
-  }
+  .item-tag { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 800; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
   .tag-note { background: #f3f0fa; color: var(--accent4); }
   .tag-reminder { background: #f3f0fa; color: var(--accent1); }
   .tag-partner { background: #ede9f8; color: var(--accent3); }
-
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-
-  /* QUICK CONTACT BUTTONS */
-  .quick-contacts {
-    margin-top: 10px; padding-top: 10px;
-    border-top: 2px dashed #ede9f8;
-  }
-  .quick-contacts-label {
-    font-size: 0.72rem; font-weight: 800; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px;
-  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .quick-contacts { margin-top: 10px; padding-top: 10px; border-top: 2px dashed #ede9f8; }
+  .quick-contacts-label { font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
   .quick-contact-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  .quick-contact-btn {
-    padding: 7px 14px;
-    border: 2px solid var(--accent2); border-radius: 50px;
-    background: #ede9f8; color: #5b21b6;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem;
-    cursor: pointer; transition: all 0.2s;
-    display: inline-flex; align-items: center; gap: 5px;
-  }
+  .quick-contact-btn { padding: 7px 14px; border: 2px solid var(--accent2); border-radius: 50px; background: #ede9f8; color: #5b21b6; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
   .quick-contact-btn:hover { background: var(--accent2); transform: translateY(-1px); }
-  .quick-contact-btn.selected { background: var(--accent2); border-color: #a855f7; }
-
-  /* NOTIFY ROW */
-  .notify-row {
-    display: flex; align-items: center; gap: 12px;
-    background: #f3f0fa; border: 2px solid #ede9f8;
-    border-radius: 12px; padding: 14px 18px; margin-bottom: 12px;
-  }
+  .notify-row { display: flex; align-items: center; gap: 12px; background: #f3f0fa; border: 2px solid #ede9f8; border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
   .notify-row .info { flex: 1; }
   .notify-row .info strong { display: block; font-size: 0.95rem; }
   .notify-row .info small { color: var(--muted); font-size: 0.82rem; }
-
   .toggle { position: relative; width: 50px; height: 26px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
   .toggle-track { position: absolute; inset: 0; background: #ddd6fe; border-radius: 50px; cursor: pointer; transition: 0.3s; }
   .toggle-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #f3f0fa; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
   .toggle input:checked + .toggle-track { background: var(--accent3); }
   .toggle input:checked + .toggle-track::after { transform: translateX(24px); }
-
-  .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
-  .checkbox-item input { display: none; }
-  .checkbox-box { width: 20px; height: 20px; border: 2px solid #ede9f8; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-  .checkbox-item input:checked + .checkbox-box { background: var(--accent3); border-color: var(--accent3); }
-  .checkbox-item input:checked + .checkbox-box::after { content: '✓'; color: white; font-size: 12px; font-weight: 900; }
-
-  .check-circle {
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 3px solid #ede9f8;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; flex-shrink: 0;
-    font-size: 1rem; font-weight: 900; color: white; background: #f3f0fa;
-    transition: all 0.2s;
-  }
+  .check-circle { width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ede9f8; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 1rem; font-weight: 900; color: white; background: #f3f0fa; transition: all 0.2s; }
   .check-circle:hover { border-color: var(--accent3); }
   .check-circle.checked { background: var(--accent3); border-color: var(--accent3); }
-
-  .checklist-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0; border-bottom: 1px solid #ede9f8;
-  }
+  .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #ede9f8; }
   .checklist-item:last-child { border-bottom: none; }
   .checklist-done { text-decoration: line-through; color: var(--muted); }
-  .checklist-delete-btn {
-    background: #ede9f8; border: none; border-radius: 50%;
-    width: 30px; height: 30px; flex-shrink: 0;
-    font-size: 0.85rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--accent1); transition: all 0.2s;
-  }
+  .checklist-delete-btn { background: #ede9f8; border: none; border-radius: 50%; width: 30px; height: 30px; flex-shrink: 0; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--accent1); transition: all 0.2s; }
   .checklist-delete-btn:hover { background: var(--accent1); color: white; }
-
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
   .empty p { font-size: 0.95rem; }
-
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: none; align-items: center; justify-content: center;
-    z-index: 999; padding: 20px;
-  }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card); border-radius: var(--radius);
-    padding: 28px; max-width: 420px; width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    animation: slideUp 0.3s ease;
-    max-height: 90vh; overflow-y: auto;
-  }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal { background: var(--card); border-radius: var(--radius); padding: 28px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
   .modal h3 { font-size: 1.3rem; margin-bottom: 12px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; flex-wrap: wrap; }
-
-  .type-picker { display: flex; gap: 10px; margin-bottom: 16px; }
-  .type-option {
-    flex: 1; padding: 12px; border: 2px solid #ede9f8; border-radius: 12px;
-    text-align: center; cursor: pointer; transition: all 0.2s;
-    font-weight: 700; font-size: 0.85rem;
-  }
-  .type-option.selected { border-color: var(--accent1); background: #f3f0fa; color: var(--accent1); }
-  .type-option .type-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
-
-  .reminder-options { display: none; }
-  .reminder-options.show { display: block; }
-
-  .pre-remind-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .pre-remind-btn {
-    padding: 8px 14px; border: 2px solid #ede9f8; border-radius: 50px;
-    background: #f3f0fa; cursor: pointer;
-    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.8rem;
-    transition: all 0.2s;
-  }
-  .pre-remind-btn.selected { border-color: var(--accent4); background: #f3f0fa; color: var(--accent4); }
-
-  .section-title {
-    font-family: 'Righteous', cursive; font-size: 1.8rem; color: var(--text);
-    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-  }
-
-  /* CONTACT SLOTS IN SETTINGS */
-  .contact-slot {
-    background: #f3f0fa; border: 2px solid #ede9f8;
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
-  }
-  .contact-slot-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .contact-number {
-    background: var(--accent1); color: white; border-radius: 50%;
-    width: 28px; height: 28px; min-width: 28px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 0.85rem;
-  }
-  .contact-slot h3 { font-size: 0.95rem; font-weight: 800; }
-  .contact-inputs { display: flex; gap: 10px; }
-  .contact-inputs input { flex: 1; margin-bottom: 0; }
-
-  /* SEND PANEL inside Add form */
-  .send-options-panel {
-    display: none; margin-top: 14px;
-    background: #ede9f8; border: 2px solid var(--accent2);
-    border-radius: 14px; padding: 16px;
-  }
-  .send-options-panel .send-label { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
-  .send-options-panel .send-sublabel { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
-  .send-method-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-  /* CONTACT SELECT BUTTONS */
-  .contact-select-btn {
-    padding: 10px 18px;
-    background: #ede9f8; color: var(--accent1);
-    border: 2px solid #ddd6fe; border-radius: 50px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
-    cursor: pointer; transition: all 0.2s;
-  }
+  .section-title { font-family: 'Righteous', cursive; font-size: 1.8rem; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .contact-select-btn { padding: 10px 18px; background: #ede9f8; color: var(--accent1); border: 2px solid #ddd6fe; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
   .contact-select-btn:hover { border-color: var(--accent1); }
   .contact-select-btn.selected { background: var(--accent1); color: white; border-color: var(--accent1); }
-
-  /* CLEAR INPUT BUTTON */
-  .clear-input-btn {
-    background: none; border: none;
-    font-size: 1.5rem; font-weight: 900; cursor: pointer;
-    padding: 4px; color: #e53935;
-    flex-shrink: 0; line-height: 1;
-    transition: opacity 0.2s;
-  }
+  .clear-input-btn { background: none; border: none; font-size: 1.5rem; font-weight: 900; cursor: pointer; padding: 4px; color: #e53935; flex-shrink: 0; line-height: 1; transition: opacity 0.2s; }
   .clear-input-btn:hover { opacity: 0.7; }
-
-  /* VOICE BUTTON */
-  .voice-btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 12px;
-    background: #ede9f8;
-    color: var(--accent1);
-    border: 2px solid var(--accent3);
-    border-radius: 50px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .voice-btn:hover { background: var(--accent1); color: white; border-color: var(--accent1); }
-  .voice-btn.listening {
-    background: var(--accent1);
-    color: white;
-    border-color: var(--accent4);
-    animation: pulse 1s infinite;
-  }
-
-  /* SAVE & CALENDAR BUTTON */
-  .btn-cal-save {
-    background: var(--accent1); color: white;
-    box-shadow: 0 3px 10px rgba(124,58,237,0.20);
-  }
+  .btn-cal-save { background: var(--accent1); color: white; box-shadow: 0 3px 10px rgba(124,58,237,0.20); }
   .btn-cal-save:hover:not(:disabled) { background: var(--accent4); transform: translateY(-1px); }
-  .btn-cal-save:disabled {
-    background: #ddd6fe; color: #b39ddb;
-    box-shadow: none; cursor: not-allowed; transform: none;
-  }
-
-  /* CALENDAR BUTTON (on cards) */
-  .cal-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 18px;
-    background: var(--accent1); color: white;
-    border: none; border-radius: 50px;
-    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem;
-    cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 3px 10px rgba(124,58,237,0.20);
-  }
-  .cal-btn:hover { background: var(--accent4); transform: translateY(-1px); box-shadow: 0 5px 15px rgba(193,127,36,0.35); }
+  .btn-cal-save:disabled { background: #ddd6fe; color: #b39ddb; box-shadow: none; cursor: not-allowed; transform: none; }
+  .cal-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; background: var(--accent1); color: white; border: none; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .cal-btn:hover { background: var(--accent4); transform: translateY(-1px); }
 </style>
 </head>
 <body>
 
-<!-- INSTALL BANNER (Android/Chrome) -->
 <div class="install-banner" id="installBanner">
   <p>📲 Add Don't Forget! to your home screen for instant access</p>
   <div class="install-btns">
@@ -446,14 +141,13 @@
   </div>
 </div>
 
-<!-- IOS INSTRUCTIONS MODAL -->
 <div class="ios-modal" id="iosModal">
   <div class="ios-box">
     <h3>Add to Home Screen 📲</h3>
     <p>Follow these steps in Safari to install Don't Forget! as an app on your iPhone:</p>
     <div class="ios-steps">
-      <div class="ios-step"><div class="ios-step-num">1</div><div>Tap the <strong>Share button</strong> at the bottom of Safari — it looks like a box with an arrow pointing up ⬆</div></div>
-      <div class="ios-step"><div class="ios-step-num">2</div><div>Scroll down the menu and tap <strong>"Add to Home Screen"</strong></div></div>
+      <div class="ios-step"><div class="ios-step-num">1</div><div>Tap the <strong>Share button</strong> at the bottom of Safari ⬆</div></div>
+      <div class="ios-step"><div class="ios-step-num">2</div><div>Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>
       <div class="ios-step"><div class="ios-step-num">3</div><div>Tap <strong>"Add"</strong> in the top right — done! 🎉</div></div>
     </div>
     <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeIosModal()">Got it! 👍</button>
@@ -470,9 +164,7 @@
       <span style="font-size:1.8rem; line-height:1;">🧠</span>
       <h1>Don't Forget!</h1>
     </div>
-    <button class="install-header-btn hidden" id="installHeaderBtn" onclick="handleInstallClick()" style="font-size:0.75rem; padding:6px 12px;">
-      📲 Install
-    </button>
+    <button class="install-header-btn hidden" id="installHeaderBtn" onclick="handleInstallClick()">📲 Install</button>
   </div>
 </header>
 
@@ -498,7 +190,7 @@
     <div class="section-title">Tonight's Checklist ✅</div>
     <div class="card">
       <div id="checklist-container">
-        <div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they'll appear here each evening for you to tick off!</p></div>
+        <div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they'll appear here each evening!</p></div>
       </div>
       <div id="checklist-reset" style="display:none; margin-top:12px;">
         <button class="btn btn-secondary btn-sm" onclick="resetChecklist()">↺ Reset Ticks</button>
@@ -506,7 +198,7 @@
     </div>
     <div class="section-title">All My Things</div>
     <div id="all-items-list" class="items-list">
-      <div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>
+      <div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap + Add to get started.</p></div>
     </div>
   </div>
 
@@ -514,11 +206,9 @@
   <div class="panel" id="panel-add">
     <div class="section-title">Add Something ✏️</div>
     <div class="card" style="display:flex; flex-direction:column; gap:14px;">
-
-      <!-- TEXT INPUT + MIC -->
       <div style="display:flex; gap:10px; align-items:center;">
         <div style="position:relative; flex:1;">
-          <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box;" oninput="parseTypedInput(this.value)">
+          <input type="text" id="item-title" placeholder="What do you need to remember?" style="font-size:1.05rem; padding:14px 50px 14px 16px; width:100%; box-sizing:border-box; margin-bottom:0;" oninput="parseTypedInput(this.value)">
           <button id="voice-btn" onclick="toggleVoice()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.4rem; cursor:pointer; padding:4px; line-height:1;" title="Tap to speak">🎤</button>
         </div>
         <button onclick="document.getElementById('item-title').value=''; parseTypedInput('');" class="clear-input-btn" title="Clear">✕</button>
@@ -526,44 +216,39 @@
       <div id="voice-status" style="display:none; font-size:0.82rem; color:var(--accent1); font-weight:800; text-align:center;">🔴 Listening — speak now...</div>
       <div id="voice-unsupported" style="display:none; font-size:0.8rem; color:var(--muted);">⚠️ Voice not supported — try Chrome or Safari.</div>
 
-      <!-- DATE/TIME — collapsed by default -->
       <div>
         <button onclick="toggleDatePanel()" id="date-toggle-btn" style="background:none; border:none; color:var(--muted); font-family:'Nunito',sans-serif; font-weight:800; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:6px;">
           📅 <span id="date-toggle-label">Add date &amp; time (optional)</span>
         </button>
         <div id="date-panel" style="display:none; margin-top:10px; gap:10px; flex-wrap:wrap;">
-          <input type="date" id="item-date" onchange="updateDateLabel(); updateCalBtn();" style="flex:1; min-width:140px;">
-          <input type="time" id="item-time" onchange="updateDateLabel(); suggestRemindTime(this.value);" style="flex:1; min-width:120px;">
+          <input type="date" id="item-date" onchange="updateDateLabel(); updateCalBtn();" style="flex:1; min-width:140px; margin-bottom:0;">
+          <input type="time" id="item-time" onchange="updateDateLabel(); suggestRemindTime(this.value);" style="flex:1; min-width:120px; margin-bottom:0;">
           <div style="width:100%; display:flex; align-items:center; gap:10px; margin-top:4px;">
-            <label style="font-size:0.8rem; color:var(--muted); font-weight:800; white-space:nowrap;">🔔 Remind me at</label>
-            <input type="time" id="item-remind-time" style="flex:1;" placeholder="e.g. 18:30">
+            <label style="font-size:0.8rem; color:var(--muted); font-weight:800; white-space:nowrap; margin-bottom:0; text-transform:none; letter-spacing:0;">🔔 Remind me at</label>
+            <input type="time" id="item-remind-time" style="flex:1; margin-bottom:0;">
             <button onclick="clearRemindTime()" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;" title="Clear">✕</button>
           </div>
           <div id="remind-suggestion" style="display:none; width:100%; font-size:0.78rem; color:var(--accent1); font-weight:800;"></div>
         </div>
       </div>
 
-      <!-- CONTACT BUTTONS -->
       <div>
         <div style="font-size:0.8rem; color:var(--muted); font-weight:800; margin-bottom:8px;">SEND TO</div>
         <div id="add-contact-btns" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
       </div>
 
-      <!-- ACTION BUTTONS -->
       <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
         <button class="btn" onclick="saveOnlyItem()" style="justify-content:center; background:#ede9f8; color:var(--accent1); font-size:0.9rem; padding:12px;">💾 Just save (no send)</button>
         <button class="btn btn-primary" id="save-send-btn" onclick="saveSendWhatsApp()" style="justify-content:center; font-size:1rem; padding:14px;">📱 Save &amp; Send on WhatsApp</button>
         <button class="btn btn-cal-save" id="save-cal-btn" onclick="saveItemAndCalendar()" disabled style="justify-content:center; font-size:0.9rem; padding:12px;">📅 Save &amp; Add to Calendar</button>
         <button class="btn btn-cal-save" id="save-send-cal-btn" onclick="saveSendAndCalendar()" disabled style="justify-content:center; font-size:0.9rem; padding:12px; background:var(--accent4);">📱📅 Save, Send &amp; Add to Calendar</button>
       </div>
-
     </div>
   </div>
 
   <!-- SETTINGS -->
   <div class="panel" id="panel-settings">
     <div class="section-title">Settings ⚙️</div>
-
     <div class="card">
       <h2>🔔 Evening Reminder</h2>
       <p style="color:var(--muted); font-size:0.88rem; margin-bottom:16px;">Get a browser notification each evening to check your list.</p>
@@ -584,35 +269,34 @@
       <button class="btn btn-secondary btn-sm" onclick="testNotification()">🔔 Test Notification Now</button>
     </div>
 
-    <!-- 5 CONTACTS -->
     <div class="card">
       <h2>👥 Your 5 Quick Contacts</h2>
-      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:16px;">Save up to 5 people you message regularly. Their names appear as quick-tap buttons whenever you flag something to share — no typing needed!</p>
+      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:16px;">Save up to 5 people you message regularly. Their names appear as quick-tap buttons on the Add page.</p>
       <div id="contacts-settings-list">
         <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
           <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">1</span>
-          <input type="text" id="contact-name-1" placeholder="Name" style="flex:1;">
-          <input type="tel" id="contact-phone-1" placeholder="07911123456" style="flex:2;">
+          <input type="text" id="contact-name-1" placeholder="Name" style="flex:1; margin-bottom:0;">
+          <input type="tel" id="contact-phone-1" placeholder="07911123456" style="flex:2; margin-bottom:0;">
         </div>
         <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
           <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">2</span>
-          <input type="text" id="contact-name-2" placeholder="Name" style="flex:1;">
-          <input type="tel" id="contact-phone-2" placeholder="07911123456" style="flex:2;">
+          <input type="text" id="contact-name-2" placeholder="Name" style="flex:1; margin-bottom:0;">
+          <input type="tel" id="contact-phone-2" placeholder="07911123456" style="flex:2; margin-bottom:0;">
         </div>
         <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
           <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">3</span>
-          <input type="text" id="contact-name-3" placeholder="Name" style="flex:1;">
-          <input type="tel" id="contact-phone-3" placeholder="07911123456" style="flex:2;">
+          <input type="text" id="contact-name-3" placeholder="Name" style="flex:1; margin-bottom:0;">
+          <input type="tel" id="contact-phone-3" placeholder="07911123456" style="flex:2; margin-bottom:0;">
         </div>
         <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
           <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">4</span>
-          <input type="text" id="contact-name-4" placeholder="Name" style="flex:1;">
-          <input type="tel" id="contact-phone-4" placeholder="07911123456" style="flex:2;">
+          <input type="text" id="contact-name-4" placeholder="Name" style="flex:1; margin-bottom:0;">
+          <input type="tel" id="contact-phone-4" placeholder="07911123456" style="flex:2; margin-bottom:0;">
         </div>
         <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">
           <span style="font-size:0.8rem;color:var(--muted);font-weight:800;min-width:16px;">5</span>
-          <input type="text" id="contact-name-5" placeholder="Name" style="flex:1;">
-          <input type="tel" id="contact-phone-5" placeholder="07911123456" style="flex:2;">
+          <input type="text" id="contact-name-5" placeholder="Name" style="flex:1; margin-bottom:0;">
+          <input type="tel" id="contact-phone-5" placeholder="07911123456" style="flex:2; margin-bottom:0;">
         </div>
       </div>
       <p style="font-size:0.78rem; color:var(--muted); margin-top:10px;">💡 <strong>Phone format:</strong> Either 07911123456 or +447911123456 both work fine!</p>
@@ -636,47 +320,38 @@
 
 </div>
 
-<!-- ITEM MODAL -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal" id="modal-content">
     <h3 id="modal-title"></h3>
-    <p id="modal-notes" style="color:var(--muted); margin-bottom:10px; font-size:0.9rem;"></p>
-    <div id="modal-meta" style="font-size:0.82rem; color: var(--accent4); font-weight:700; margin-bottom:10px;"></div>
-    <div id="modal-send-btns"></div>
+    <div id="modal-meta" style="font-size:0.82rem; color:var(--accent4); font-weight:700; margin-bottom:10px;"></div>
     <div class="modal-actions">
       <button class="btn btn-danger btn-sm" id="modal-delete-btn">🗑 Delete</button>
       <button class="btn btn-primary btn-sm" id="modal-done-btn">✅ Mark Done</button>
-      <button class="btn btn-sm" id="modal-cal-btn" style="background:#ede9f8; color:var(--text); display:none;">📅 Add to Calendar</button>
+      <button class="btn btn-sm" id="modal-cal-btn" style="background:#ede9f8; color:var(--text); display:none;">📅 Calendar</button>
       <button class="btn btn-sm" onclick="closeModal()" style="background:#ede9f8; color:var(--text);">Close</button>
     </div>
   </div>
 </div>
 
 <script>
-// ——— DATA ———
 let items = JSON.parse(localStorage.getItem('df_items') || '[]');
-let selectedContact = null; // persists across renders
+let selectedContact = null;
 let settings = JSON.parse(localStorage.getItem('df_settings') || JSON.stringify({
-  notifTime: '19:00',
-  notifEnabled: false,
+  notifTime: '19:00', notifEnabled: false,
   contacts: [{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''}]
 }));
-if (!settings.contacts) {
-  settings.contacts = [
-    {name: settings.partnerName||'', phone: settings.partnerPhone||''},
-    {name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''}
-  ];
-}
+if (!settings.contacts) settings.contacts = [{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''},{name:'',phone:''}];
 let checkedToday = JSON.parse(localStorage.getItem('df_checked') || '[]');
 let currentType = 'reminder';
 let preReminds = [];
-let notifInterval = null;
-let deferredInstallPrompt = null;
+let deferredPrompt = null;
+let recognition = null;
+let isListening = false;
+let parseTimer = null;
 
 function save() { localStorage.setItem('df_items', JSON.stringify(items)); }
 function persistSettings() { localStorage.setItem('df_settings', JSON.stringify(settings)); }
 
-// ——— TABS ———
 function showTab(tab) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -684,23 +359,6 @@ function showTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   renderAll();
 }
-
-// ——— TYPE PICKER ———
-function selectType(type) {
-  currentType = type;
-  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
-  document.getElementById('type-' + type).classList.add('selected');
-  document.getElementById('reminder-options').classList.toggle('show', type === 'reminder');
-  updateCalBtn();
-}
-
-function togglePreRemind(btn, val) {
-  btn.classList.toggle('selected');
-  preReminds = preReminds.includes(val) ? preReminds.filter(v => v !== val) : [...preReminds, val];
-}
-
-// ——— SAVE ITEM ———
-
 
 function updateCalBtn() {
   const hasDate = !!document.getElementById('item-date').value;
@@ -710,8 +368,6 @@ function updateCalBtn() {
   if (b2) b2.disabled = !hasDate;
 }
 
-
-// ——— RENDER ———
 function renderAll() {
   renderAllItems();
   renderChecklist();
@@ -726,10 +382,10 @@ function formatDate(d) {
   const today = new Date(); today.setHours(0,0,0,0);
   const diff = Math.round((date - today) / 86400000);
   const base = date.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
-  if (diff === 0) return `Today — ${base}`;
-  if (diff === 1) return `Tomorrow — ${base}`;
-  if (diff < 0) return `${Math.abs(diff)} days ago — ${base}`;
-  if (diff <= 7) return `In ${diff} days — ${base}`;
+  if (diff === 0) return 'Today — ' + base;
+  if (diff === 1) return 'Tomorrow — ' + base;
+  if (diff < 0) return Math.abs(diff) + ' days ago — ' + base;
+  if (diff <= 7) return 'In ' + diff + ' days — ' + base;
   return base;
 }
 
@@ -740,58 +396,43 @@ function getIcon(item) {
 }
 
 function getNamedContacts() {
-  return settings.contacts.filter(c => c.name && c.name.trim());
+  return (settings.contacts || []).filter(c => c.name && c.name.trim());
 }
 
 function renderAllItems() {
   const el = document.getElementById('all-items-list');
-  if (!items.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap "+ Add Thing" to get started.</p></div>';
-    return;
-  }
+  if (!items.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">💭</div><p>Nothing saved yet! Tap + Add to get started.</p></div>'; return; }
   const namedContacts = getNamedContacts();
   el.innerHTML = items.map(item => {
-    // Build the expanded detail section (hidden by default)
     let quickBtns = '';
     if (item.forPartner && namedContacts.length) {
-      const msg = item.title;
       const btns = namedContacts.map(c => {
-        const mj = JSON.stringify(msg), nj = JSON.stringify(c.name), pj = JSON.stringify(c.phone);
-        return `<button class="quick-contact-btn" onclick="event.stopPropagation(); sendToContact(${nj},${pj},${mj})">📱 ${c.name}</button>`;
+        const mj = JSON.stringify(item.title), nj = JSON.stringify(c.name), pj = JSON.stringify(c.phone);
+        return '<button class="quick-contact-btn" onclick="event.stopPropagation(); sendToContact(' + nj + ',' + pj + ',' + mj + ')">📱 ' + c.name + '</button>';
       }).join('');
-      quickBtns = `<div class="quick-contacts"><div class="quick-contacts-label">Quick send to:</div><div class="quick-contact-btns">${btns}</div></div>`;
+      quickBtns = '<div class="quick-contacts"><div class="quick-contacts-label">Quick send to:</div><div class="quick-contact-btns">' + btns + '</div></div>';
     }
-
-    const calBtn = item.date ? `<button class="cal-btn" style="margin-top:8px;" onclick="event.stopPropagation(); addToCalendar(${item.id})">📅 Add to Calendar</button>` : '';
-
-    const detail = `
-      <div class="item-detail" id="detail-${item.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:2px dashed #c2d9ce;">
-        ${item.remindTime ? `<div style="font-size:0.8rem;color:var(--accent1);font-weight:800;margin-bottom:6px;">🔔 Reminder set for ${item.remindTime}</div>` : ''}
-        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px;">
-          <span class="item-tag tag-reminder">${item.date ? '⏰ Reminder' : '📌 Note'}</span>
-          ${item.forPartner ? '<span class="item-tag tag-partner">💌 To share</span>' : ''}
-          ${item.done ? '<span class="item-tag" style="background:#e8f5f0;color:var(--accent4);">✅ Done</span>' : ''}
-        </div>
-        ${calBtn}
-        ${quickBtns}
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <button class="btn btn-sm" style="background:#e8f2ed;color:var(--accent4);" onclick="event.stopPropagation(); markDone(${item.id})">${item.done ? '↩ Unmark' : '✅ Done'}</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteItem(${item.id})">🗑 Delete</button>
-        </div>
-      </div>`;
-
-    return `
-    <div class="item-card ${item.date ? 'type-reminder' : 'type-note'} ${item.done ? 'done' : ''}" onclick="toggleItemDetail(${item.id})">
-      <div class="item-icon">${getIcon(item)}</div>
-      <div class="item-body">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-          <div class="item-title" style="flex:1;">${item.title}</div>
-          <div class="item-chevron" id="chevron-${item.id}" style="color:var(--muted); font-size:0.8rem; flex-shrink:0;">▼</div>
-        </div>
-        ${item.date ? `<div class="item-meta" style="margin-top:2px;">📅 ${formatDate(item.date)}${item.time ? ' at ' + item.time : ''}</div>` : ''}
-        ${detail}
-      </div>
-    </div>`;
+    const calBtn = item.date ? '<button class="cal-btn" style="margin-top:8px;" onclick="event.stopPropagation(); addToCalendar(' + item.id + ')">📅 Add to Calendar</button>' : '';
+    const detail = '<div class="item-detail" id="detail-' + item.id + '" style="display:none; margin-top:10px; padding-top:10px; border-top:2px dashed #ddd6fe;">' +
+      (item.remindTime ? '<div style="font-size:0.8rem;color:var(--accent1);font-weight:800;margin-bottom:6px;">🔔 Reminder at ' + item.remindTime + '</div>' : '') +
+      '<div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px;">' +
+      '<span class="item-tag tag-reminder">' + (item.date ? '⏰ Reminder' : '📌 Note') + '</span>' +
+      (item.forPartner ? '<span class="item-tag tag-partner">💌 To share</span>' : '') +
+      (item.done ? '<span class="item-tag" style="background:#ede9f8;color:var(--accent4);">✅ Done</span>' : '') +
+      '</div>' + calBtn + quickBtns +
+      '<div style="display:flex; gap:8px; margin-top:10px;">' +
+      '<button class="btn btn-sm" style="background:#ede9f8;color:var(--accent4);" onclick="event.stopPropagation(); markDone(' + item.id + ')">' + (item.done ? '↩ Unmark' : '✅ Done') + '</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteItem(' + item.id + ')">🗑 Delete</button>' +
+      '</div></div>';
+    return '<div class="item-card ' + (item.date ? 'type-reminder' : 'type-note') + (item.done ? ' done' : '') + '" onclick="toggleItemDetail(' + item.id + ')">' +
+      '<div class="item-icon">' + getIcon(item) + '</div>' +
+      '<div class="item-body">' +
+      '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+      '<div class="item-title" style="flex:1;">' + item.title + '</div>' +
+      '<div id="chevron-' + item.id + '" style="color:var(--muted); font-size:0.8rem; flex-shrink:0;">▼</div>' +
+      '</div>' +
+      (item.date ? '<div class="item-meta" style="margin-top:2px;">📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') + '</div>' : '') +
+      detail + '</div></div>';
   }).join('');
 }
 
@@ -807,32 +448,23 @@ function toggleItemDetail(id) {
 function renderChecklist() {
   const el = document.getElementById('checklist-container');
   const reset = document.getElementById('checklist-reset');
-  if (!items.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they\'ll appear here each evening!</p></div>';
-    reset.style.display = 'none'; return;
-  }
+  if (!items.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div><p>Add some things and they\'ll appear here!</p></div>'; reset.style.display = 'none'; return; }
   const active = items.filter(i => !i.done);
-  if (!active.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Everything is ticked off — great job!</p></div>';
-    reset.style.display = 'block'; return;
-  }
+  if (!active.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Everything is ticked off — great job!</p></div>'; reset.style.display = 'block'; return; }
   reset.style.display = 'block';
   el.innerHTML = active.map(item => {
     const checked = checkedToday.includes(item.id);
-    return `
-    <div class="checklist-item">
-      <div class="check-circle ${checked ? 'checked' : ''}" onclick="toggleCheck(${item.id})">${checked ? '✓' : ''}</div>
-      <label class="${checked ? 'checklist-done' : ''}" style="flex:1; cursor:pointer;" onclick="toggleCheck(${item.id})">
-        ${getIcon(item)} <strong>${item.title}</strong>
-        ${item.date ? `<span style="color:var(--muted);font-size:0.8rem;"> (${formatDate(item.date)})</span>` : ''}
-      </label>
-      <button class="checklist-delete-btn" onclick="event.stopPropagation(); removeCheckedItem(${item.id})" title="Delete">🗑</button>
-    </div>`;
+    return '<div class="checklist-item">' +
+      '<div class="check-circle ' + (checked ? 'checked' : '') + '" onclick="toggleCheck(' + item.id + ')">' + (checked ? '✓' : '') + '</div>' +
+      '<label class="' + (checked ? 'checklist-done' : '') + '" style="flex:1; cursor:pointer;" onclick="toggleCheck(' + item.id + ')">' +
+      getIcon(item) + ' <strong>' + item.title + '</strong>' +
+      (item.date ? '<span style="color:var(--muted);font-size:0.8rem;"> (' + formatDate(item.date) + ')</span>' : '') +
+      '</label>' +
+      '<button class="checklist-delete-btn" onclick="event.stopPropagation(); removeCheckedItem(' + item.id + ')" title="Delete">🗑</button>' +
+      '</div>';
   }).join('');
 }
 
-
-// ——— CHECKLIST ———
 function toggleCheck(id) {
   checkedToday = checkedToday.includes(id) ? checkedToday.filter(i => i !== id) : [...checkedToday, id];
   localStorage.setItem('df_checked', JSON.stringify(checkedToday));
@@ -842,10 +474,8 @@ function toggleCheck(id) {
 function removeCheckedItem(id) {
   items = items.filter(i => i.id !== id);
   checkedToday = checkedToday.filter(i => i !== id);
-  save();
-  localStorage.setItem('df_checked', JSON.stringify(checkedToday));
-  renderAll();
-  showToast('🗑 Removed!');
+  save(); localStorage.setItem('df_checked', JSON.stringify(checkedToday));
+  renderAll(); showToast('🗑 Removed!');
 }
 
 function resetChecklist() {
@@ -854,19 +484,15 @@ function resetChecklist() {
   renderChecklist();
 }
 
-// ——— ADD FORM ———
 function renderAddContactBtns() {
   const container = document.getElementById('add-contact-btns');
   if (!container) return;
   const contacts = (settings.contacts || []).filter(c => c.name && c.name.trim());
-  if (!contacts.length) {
-    container.innerHTML = '<span style="font-size:0.8rem;color:var(--muted);">Add contacts in Settings to enable quick send</span>';
-    return;
-  }
+  if (!contacts.length) { container.innerHTML = '<span style="font-size:0.8rem;color:var(--muted);">Add contacts in Settings to enable quick send</span>'; return; }
   container.innerHTML = contacts.map(c => {
     const sid = 'ac-' + c.name.replace(/[^a-zA-Z0-9]/g,'_');
     const isSelected = selectedContact && selectedContact.name === c.name;
-    return `<button class="contact-select-btn ${isSelected ? 'selected' : ''}" id="${sid}" onclick="selectAddContact(${JSON.stringify(c.name)}, ${JSON.stringify(c.phone || '')})">${c.name}</button>`;
+    return '<button class="contact-select-btn ' + (isSelected ? 'selected' : '') + '" id="' + sid + '" onclick="selectAddContact(' + JSON.stringify(c.name) + ', ' + JSON.stringify(c.phone || '') + ')">' + c.name + '</button>';
   }).join('');
 }
 
@@ -881,44 +507,26 @@ function toggleDatePanel() {
   const panel = document.getElementById('date-panel');
   const open = panel.style.display === 'flex';
   panel.style.display = open ? 'none' : 'flex';
-  if (open) {
-    document.getElementById('item-date').value = '';
-    document.getElementById('item-time').value = '';
-    document.getElementById('date-toggle-label').textContent = 'Add date & time (optional)';
-    updateCalBtn();
-  }
+  if (open) { document.getElementById('item-date').value = ''; document.getElementById('item-time').value = ''; document.getElementById('date-toggle-label').textContent = 'Add date & time (optional)'; updateCalBtn(); }
 }
 
 function updateDateLabel() {
   const date = document.getElementById('item-date').value;
   const time = document.getElementById('item-time').value;
   const lbl = document.getElementById('date-toggle-label');
-  if (date) {
-    lbl.textContent = formatDate(date) + (time ? ' at ' + time : '');
-    lbl.style.color = 'var(--accent1)';
-  } else {
-    lbl.textContent = 'Add date & time (optional)';
-    lbl.style.color = '';
-  }
+  if (date) { lbl.textContent = formatDate(date) + (time ? ' at ' + time : ''); lbl.style.color = 'var(--accent1)'; }
+  else { lbl.textContent = 'Add date & time (optional)'; lbl.style.color = ''; }
   updateCalBtn();
 }
 
 function buildItemFromForm() {
   const title = (document.getElementById('item-title').value || '').trim();
   if (!title) { showToast('Please enter something first!'); return null; }
-  return {
-    id: Date.now(),
-    type: 'reminder',
-    title,
-    notes: '',
+  return { id: Date.now(), type: 'reminder', title, notes: '',
     date: document.getElementById('item-date').value,
     time: document.getElementById('item-time').value,
     remindTime: document.getElementById('item-remind-time').value,
-    preReminds: [],
-    forPartner: !!selectedContact,
-    done: false,
-    created: new Date().toISOString()
-  };
+    preReminds: [], forPartner: !!selectedContact, done: false, created: new Date().toISOString() };
 }
 
 function clearAddForm() {
@@ -935,19 +543,17 @@ function clearAddForm() {
   updateCalBtn();
   if (isListening && recognition) recognition.stop();
   document.getElementById('voice-status').style.display = 'none';
-  document.getElementById('voice-btn').classList.remove('listening');
 }
 
-function buildMsg(item) {
-  return (selectedContact ? selectedContact.name + ", just a heads up — don't forget: " : "Don't forget: ")
+function buildWhatsAppMsg(item, contact) {
+  return (contact ? contact.name + ", just a heads up — don't forget: " : "Don't forget: ")
     + item.title
     + (item.date ? '\n📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '')
     + "\n\n— Sent via Don't Forget! 🧠";
 }
 
 function saveSendWhatsApp() {
-  const item = buildItemFromForm();
-  if (!item) return;
+  const item = buildItemFromForm(); if (!item) return;
   if (!selectedContact) { showToast('👆 Tap a contact name above first!'); return; }
   if (!selectedContact.phone) { showToast('No number for ' + selectedContact.name + ' — add it in Settings'); return; }
   showSendPreview(item, selectedContact, false);
@@ -956,116 +562,67 @@ function saveSendWhatsApp() {
 function showSendPreview(item, contact, withCal) {
   const existing = document.getElementById('send-preview-popup');
   if (existing) existing.remove();
-  const msg = buildMsg(item);
+  const msg = buildWhatsAppMsg(item, contact);
   const popup = document.createElement('div');
   popup.id = 'send-preview-popup';
   popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
-  popup.innerHTML = `
-    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:420px;">
-      <div style="font-family:Righteous,cursive;font-size:1.2rem;color:var(--accent1);margin-bottom:12px;">📱 Message Preview</div>
-      <div style="background:#e8f5e9;border-radius:12px;padding:14px;font-size:0.9rem;color:#1a1a1a;white-space:pre-wrap;margin-bottom:16px;line-height:1.5;">${msg}</div>
-      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Sending to <strong>${contact.name}</strong> — looks right?</p>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button onclick="confirmSend(${JSON.stringify(JSON.stringify(item))}, ${JSON.stringify(JSON.stringify(contact))}, ${withCal})"
-          style="background:var(--accent1);color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
-          ✅ Yes, send it!
-        </button>
-        <button onclick="document.getElementById('send-preview-popup').remove();"
-          style="background:#ede9f8;color:var(--accent1);border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
-          ✏️ Edit first
-        </button>
-      </div>
-    </div>`;
+  popup.innerHTML = '<div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:420px;">' +
+    '<div style="font-family:Righteous,cursive;font-size:1.2rem;color:var(--accent1);margin-bottom:12px;">📱 Message Preview</div>' +
+    '<div style="background:#e8f5e9;border-radius:12px;padding:14px;font-size:0.9rem;color:#1a1a1a;white-space:pre-wrap;margin-bottom:16px;line-height:1.5;">' + msg + '</div>' +
+    '<p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Sending to <strong>' + contact.name + '</strong> — looks right?</p>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    '<button onclick="confirmSend(' + JSON.stringify(JSON.stringify(item)) + ', ' + JSON.stringify(JSON.stringify(contact)) + ', ' + withCal + ')" style="background:var(--accent1);color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Yes, send it!</button>' +
+    '<button onclick="document.getElementById(\'send-preview-popup\').remove();" style="background:#ede9f8;color:var(--accent1);border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">✏️ Edit first</button>' +
+    '</div></div>';
   document.body.appendChild(popup);
-  popup.addEventListener('click', e => { if(e.target===popup) popup.remove(); });
+  popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
 }
 
 function confirmSend(itemJson, contactJson, withCal) {
   document.getElementById('send-preview-popup').remove();
-  const item = JSON.parse(itemJson);
-  const contact = JSON.parse(contactJson);
+  const item = JSON.parse(itemJson), contact = JSON.parse(contactJson);
   items.unshift(item); save();
-  const msg = (contact.name ? contact.name + ", just a heads up — don't forget: " : '') + item.title
-    + (item.date ? '\n📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '')
-    + "\n\n— Sent via Don't Forget! 🧠";
+  const msg = buildWhatsAppMsg(item, contact);
   window.open(buildWhatsAppUrl(contact.phone, msg), '_blank');
-  if (withCal) { setTimeout(() => showCalPicker(item.id), 600); }
+  if (withCal) setTimeout(() => showCalPicker(item.id), 600);
   clearAddForm(); showTab('today');
   showToast('✅ Saved & sent to ' + contact.name + '!');
 }
 
 function saveOnlyItem() {
-  const item = buildItemFromForm();
-  if (!item) return;
-  items.unshift(item); save();
-  scheduleItemReminder(item);
-  clearAddForm(); showTab('today');
-  showToast('✅ Saved!');
+  const item = buildItemFromForm(); if (!item) return;
+  items.unshift(item); save(); scheduleItemReminder(item);
+  clearAddForm(); showTab('today'); showToast('✅ Saved!');
 }
 
 function saveItemAndCalendar() {
-  const item = buildItemFromForm();
-  if (!item) return;
+  const item = buildItemFromForm(); if (!item) return;
   if (!item.date) { showToast('Please add a date first!'); return; }
   items.unshift(item); save();
   clearAddForm(); showTab('today');
-  showToast('✅ Saved! Choose your calendar app...');
+  showToast('✅ Saved! Choose your calendar...');
   setTimeout(() => showCalPicker(item.id), 400);
 }
 
 function saveSendAndCalendar() {
-  const item = buildItemFromForm();
-  if (!item) return;
+  const item = buildItemFromForm(); if (!item) return;
   if (!item.date) { showToast('Please add a date first!'); return; }
   if (!selectedContact) { showToast('👆 Tap a contact name above first!'); return; }
   if (!selectedContact.phone) { showToast('No number for ' + selectedContact.name + ' — add it in Settings'); return; }
   showSendPreview(item, selectedContact, true);
 }
 
-// Keep old saveItem as alias
 function saveItem() { saveOnlyItem(); }
-
-// ——— VOICE INPUT ———
-let recognition = null;
-let isListening = false;
 
 function initVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    const u = document.getElementById('voice-unsupported');
-    const b = document.getElementById('voice-btn');
-    if (u) u.style.display = 'block';
-    if (b) b.style.display = 'none';
-    return false;
-  }
+  if (!SR) { const u = document.getElementById('voice-unsupported'), b = document.getElementById('voice-btn'); if (u) u.style.display='block'; if (b) b.style.display='none'; return false; }
   recognition = new SR();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.lang = 'en-GB';
-  recognition.onstart = () => {
-    isListening = true;
-    document.getElementById('voice-btn').textContent = '⏹️';
-    document.getElementById('voice-status').style.display = 'block';
-  };
-  recognition.onresult = (e) => {
-    let t = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
-    document.getElementById('item-title').value = t;
-  };
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById('voice-btn').textContent = '🎤';
-    document.getElementById('voice-status').style.display = 'none';
-    const t = document.getElementById('item-title').value;
-    if (t) parseVoiceTranscript(t);
-  };
-  recognition.onerror = (e) => {
-    isListening = false;
-    document.getElementById('voice-btn').textContent = '🎤';
-    document.getElementById('voice-status').style.display = 'none';
-    if (e.error === 'not-allowed') showToast('Mic permission denied');
-    else if (e.error !== 'aborted') showToast('Could not hear anything — try again');
-  };
+  recognition.continuous = false; recognition.interimResults = true; recognition.lang = 'en-GB';
+  recognition.onstart = () => { isListening = true; document.getElementById('voice-btn').textContent = '⏹️'; document.getElementById('voice-status').style.display = 'block'; };
+  recognition.onresult = (e) => { let t = ''; for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript; document.getElementById('item-title').value = t; };
+  recognition.onend = () => { isListening = false; document.getElementById('voice-btn').textContent = '🎤'; document.getElementById('voice-status').style.display = 'none'; const t = document.getElementById('item-title').value; if (t) parseVoiceTranscript(t); };
+  recognition.onerror = (e) => { isListening = false; document.getElementById('voice-btn').textContent = '🎤'; document.getElementById('voice-status').style.display = 'none'; if (e.error === 'not-allowed') showToast('Mic permission denied'); else if (e.error !== 'aborted') showToast('Could not hear — try again'); };
   return true;
 }
 
@@ -1076,344 +633,22 @@ function toggleVoice() {
   recognition.start();
 }
 
-function parseVoiceTranscript(transcript) {
-  let text = transcript;
-  let matched = [];
-  const today = new Date();
-  let detectedDate = null;
-
-  if (/\btoday\b/i.test(text)) {
-    detectedDate = new Date(); text = text.replace(/\btoday\b/i, ''); matched.push('date');
-  } else if (/\btomorrow\b/i.test(text)) {
-    detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1);
-    text = text.replace(/\btomorrow\b/i, ''); matched.push('date');
-  } else {
-    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-    const nx = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-    if (nx) {
-      const t = days.indexOf(nx[1].toLowerCase()), d = new Date();
-      d.setDate(d.getDate() + ((t-d.getDay()+7)%7||7) + 7);
-      detectedDate = d; text = text.replace(nx[0],''); matched.push('date');
-    } else {
-      const th = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-      if (th) {
-        const t = days.indexOf(th[1].toLowerCase()), d = new Date();
-        let diff = (t-d.getDay()+7)%7; if (!diff) diff=7;
-        d.setDate(d.getDate()+diff);
-        detectedDate = d; text = text.replace(th[0],''); matched.push('date');
-      }
-    }
-  }
-  if (!detectedDate) {
-    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-    const dm = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
-            || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
-    if (dm) {
-      let day, mon;
-      if (months.includes(dm[1].toLowerCase())) { mon=dm[1]; day=dm[2]; } else { day=dm[1]; mon=dm[2]; }
-      const d = new Date(today.getFullYear(), months.indexOf(mon.toLowerCase()), parseInt(day));
-      if (d < today) d.setFullYear(d.getFullYear()+1);
-      detectedDate = d; text = text.replace(dm[0],''); matched.push('date');
-    }
-  }
-  if (detectedDate) {
-    const yyyy = detectedDate.getFullYear();
-    const mm = String(detectedDate.getMonth()+1).padStart(2,'0');
-    const dd = String(detectedDate.getDate()).padStart(2,'0');
-    const datePanel = document.getElementById('date-panel');
-    datePanel.style.display = 'flex';
-    document.getElementById('item-date').value = yyyy+'-'+mm+'-'+dd;
-    updateDateLabel();
-  }
-
-  const tm = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
-  if (tm) {
-    let h=parseInt(tm[1]), m=tm[2]?parseInt(tm[2]):0;
-    const ap=tm[3]?tm[3].toLowerCase():null;
-    if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<7)h+=12;
-    const detTime = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
-    document.getElementById('item-time').value = detTime;
-    document.getElementById('date-panel').style.display='flex';
-    text=text.replace(tm[0],''); matched.push('time'); updateDateLabel(); suggestRemindTime(detTime);
-  }
-
-  // Contact detection
-  const sendPat = /\b(?:send\s+to|tell|message|remind|text|whatsapp)\s+(\w+)\b/i;
-  const sm = text.match(sendPat);
-  if (sm) {
-    const spoken = sm[1].toLowerCase();
-    const found = (settings.contacts||[]).find(c => c.name && (c.name.toLowerCase()===spoken || c.name.toLowerCase().startsWith(spoken)));
-    if (found) {
-      selectAddContact(found.name, found.phone||'');
-      text = text.replace(sm[0],'');
-      matched.push('send to '+found.name);
-    }
-  }
-
-  text = text.replace(/\s{2,}/g,' ').replace(/^[,\s]+|[,\s]+$/g,'').trim();
-  if (text) text = text.charAt(0).toUpperCase()+text.slice(1);
-  document.getElementById('item-title').value = text;
-  if (matched.length) showToast('✨ Got: '+matched.join(', '));
-}
-
-// ——— NOTIFICATIONS ———
-// ——— NOTIFICATIONS ———
-// ——— PWA INSTALL ———
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  document.getElementById('installHeaderBtn').classList.remove('hidden');
-  if (!localStorage.getItem('df_banner_dismissed')) {
-    document.getElementById('installBanner').style.display = 'block';
-  }
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installHeaderBtn').classList.add('hidden');
-  document.getElementById('installBanner').style.display = 'none';
-});
-function isIos() { return /iP(hone|ad|od)/.test(navigator.userAgent); }
-function isStandalone() { return window.navigator.standalone === true; }
-function handleInstallClick() {
-  if (isIos()) { document.getElementById('iosModal').style.display = 'flex'; return; }
-  if (deferredPrompt) { triggerInstall(); return; }
-}
-function triggerInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-  document.getElementById('installBanner').style.display = 'none';
-}
-function dismissBanner() {
-  document.getElementById('installBanner').style.display = 'none';
-  localStorage.setItem('df_banner_dismissed', '1');
-}
-function closeIosModal() { document.getElementById('iosModal').style.display = 'none'; }
-
-// ——— NOTIFICATIONS ———
-function toggleNotifications() {
-  const enabled = document.getElementById('notif-toggle').checked;
-  settings.notifEnabled = enabled;
-  persistSettings();
-  if (enabled) {
-    Notification.requestPermission().then(p => {
-      if (p === 'granted') { scheduleNotification(); showToast('🔔 Evening reminders on!'); }
-      else { showToast('Permission denied — check browser settings'); document.getElementById('notif-toggle').checked = false; settings.notifEnabled = false; persistSettings(); }
-    });
-  } else { showToast('🔕 Evening reminders off'); }
-}
-
-function saveSettingsSilent() {
-  settings.notifTime = document.getElementById('notif-time').value;
-  persistSettings();
-}
-
-function scheduleNotification() {
-  if (!('Notification' in window)) return;
-  const [h, m] = (settings.notifTime || '19:00').split(':').map(Number);
-  const now = new Date(), target = new Date();
-  target.setHours(h, m, 0, 0);
-  if (target <= now) target.setDate(target.getDate() + 1);
-  const delay = target - now;
-  setTimeout(() => {
-    if (Notification.permission === 'granted' && items.filter(i => !i.done).length) {
-      new Notification("🧠 Don't Forget!", { body: `You have ${items.filter(i=>!i.done).length} things to check tonight!` });
-    }
-  }, delay);
-}
-function testNotification() {
-  if (!('Notification' in window)) { showToast('Notifications not supported'); return; }
-  Notification.requestPermission().then(p => {
-    if (p === 'granted') {
-      new Notification("🧠 Don't Forget!", { body: "This is what your reminder looks like!" });
-      settings.notifEnabled = true; persistSettings();
-    } else { showToast('Permission denied — check browser settings'); }
-  });
-}
-
-// ——— SETTINGS ———
-function loadSettings() {
-  const timeEl = document.getElementById('notif-time');
-  if (timeEl) timeEl.value = settings.notifTime || '19:00';
-  const toggleEl = document.getElementById('notif-toggle');
-  if (toggleEl) toggleEl.checked = !!settings.notifEnabled;
-}
-function saveContacts() {
-  const contacts = [];
-  for (let i = 1; i <= 5; i++) {
-    const name = (document.getElementById('contact-name-' + i) || {}).value || '';
-    const phone = (document.getElementById('contact-phone-' + i) || {}).value || '';
-    contacts.push({ name: name.trim(), phone: phone.trim() });
-  }
-  const time = (document.getElementById('notif-time') || {}).value || '19:00';
-  settings.contacts = contacts;
-  settings.notifTime = time;
-  persistSettings();
-  renderAddContactBtns();
-  showToast('✅ Settings saved!');
-}
-function renderContactsSettings() {
-  for (let i = 1; i <= 5; i++) {
-    const c = (settings.contacts || [])[i - 1] || {};
-    const nameEl = document.getElementById('contact-name-' + i);
-    const phoneEl = document.getElementById('contact-phone-' + i);
-    if (nameEl) nameEl.value = c.name || '';
-    if (phoneEl) phoneEl.value = c.phone || '';
-  }
-}
-
-// ——— MODAL ———
-function openModal(id) {
-  const item = items.find(i => i.id === id); if (!item) return;
-  document.getElementById('modal-title').textContent = item.title;
-  document.getElementById('modal-meta').textContent = item.date ? '📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '';
-  document.getElementById('modal-delete-btn').onclick = () => { deleteItem(id); closeModal(); };
-  document.getElementById('modal-done-btn').onclick = () => { markDone(id); closeModal(); };
-  document.getElementById('modal-done-btn').textContent = item.done ? '↩ Unmark Done' : '✅ Mark Done';
-  const calBtn = document.getElementById('modal-cal-btn');
-  if (calBtn) { calBtn.style.display = item.date ? 'inline-flex' : 'none'; if (item.date) calBtn.onclick = () => showCalPicker(id); }
-  document.getElementById('item-modal').style.display = 'flex';
-}
-function closeModal() { document.getElementById('item-modal').style.display = 'none'; }
-function deleteItem(id) { items = items.filter(i => i.id !== id); save(); renderAll(); showToast('🗑 Deleted!'); }
-function markDone(id) {
-  const item = items.find(i => i.id === id); if (!item) return;
-  item.done = !item.done; save(); renderAll();
-}
-
-// ——— CLEAR BUTTONS ———
-function clearDone() { items = items.filter(i => !i.done); save(); renderAll(); showToast('✅ Done items cleared!'); }
-function clearAll() { if (confirm('Delete everything?')) { items = []; save(); renderAll(); showToast('🗑 All cleared!'); } }
-
-// ——— WHATSAPP ———
-function buildWhatsAppUrl(phone, message) {
-  let cleaned = (phone || '').replace(/[^0-9]/g, '');
-  if (cleaned.startsWith('0')) cleaned = '44' + cleaned.slice(1);
-  return cleaned ? 'https://wa.me/' + cleaned + '?text=' + encodeURIComponent(message) : 'https://wa.me/?text=' + encodeURIComponent(message);
-}
-function sendToContact(name, phone, msg) {
-  const full = name + ", just a heads up — don't forget: " + msg + "\n\n— Sent via Don't Forget! 🧠";
-  window.open(buildWhatsAppUrl(phone, full), '_blank');
-}
-
-// ——— TOAST ———
-function showToast(msg) {
-  let t = document.getElementById('toast');
-  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2d1f42;color:white;padding:10px 20px;border-radius:50px;font-weight:800;font-size:0.9rem;z-index:9999;opacity:0;transition:opacity 0.3s;white-space:nowrap;'; document.body.appendChild(t); }
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout(t._to); t._to = setTimeout(() => t.style.opacity = '0', 2500);
-}
-
-// ——— CALENDAR PICKER ———
-function showCalPicker(id) {
-  const existing = document.getElementById('cal-picker-popup');
-  if (existing) existing.remove();
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  const popup = document.createElement('div');
-  popup.id = 'cal-picker-popup';
-  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
-  popup.innerHTML = `
-    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;">
-      <div style="font-family:Righteous,cursive;font-size:1.3rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>
-      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:10px;">Opens straight in with everything filled — just tap Save!</p>
-      <div style="background:#fff8f0;border:1px solid #f5c97a;border-radius:10px;padding:10px 12px;font-size:0.8rem;color:#7a5a20;margin-bottom:16px;">
-        💡 <strong>Apple Calendar tip:</strong> When it opens, ignore the blue ✓ tick in the corner — that doesn't add it. Scroll down and tap the <strong>Add to Calendar</strong> button at the bottom instead.
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button onclick="addToGoogleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
-          style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
-          📅 Google Calendar
-        </button>
-        <button onclick="addToAppleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
-          style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
-          🍎 Apple Calendar
-        </button>
-        <button onclick="document.getElementById('cal-picker-popup').remove();"
-          style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
-          Cancel
-        </button>
-      </div>
-    </div>`;
-  document.body.appendChild(popup);
-  popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
-}
-
-
-function buildGoogleCalUrl(title, notes, date, time) {
-  const ds = date.replace(/-/g, '');
-  let dates;
-  if (time) {
-    const [h, m] = time.split(':').map(Number);
-    const eh = String(h+1).padStart(2,'0'), ms = String(m).padStart(2,'0'), hs = String(h).padStart(2,'0');
-    dates = ds+'T'+hs+ms+'00/'+ds+'T'+eh+ms+'00';
-  } else {
-    const nd = new Date(date+'T00:00:00'); nd.setDate(nd.getDate()+1);
-    dates = ds+'/'+nd.toISOString().split('T')[0].replace(/-/g,'');
-  }
-  return 'https://calendar.google.com/calendar/render?' + new URLSearchParams({action:'TEMPLATE',text:title,dates,details:notes||''});
-}
-function buildAppleCalICS(title, notes, date, time) {
-  const ds = date.replace(/-/g,'');
-  let dtS, dtE;
-  if (time) {
-    const [h,m] = time.split(':').map(Number);
-    dtS = ds+'T'+String(h).padStart(2,'0')+String(m).padStart(2,'0')+'00';
-    dtE = ds+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';
-  } else {
-    dtS = ds; const nd = new Date(date+'T00:00:00'); nd.setDate(nd.getDate()+1); dtE = nd.toISOString().split('T')[0].replace(/-/g,'');
-  }
-  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DontForget//EN','BEGIN:VEVENT',
-    'UID:df-'+Date.now()+'@dontforget','DTSTAMP:'+now,
-    (time?'DTSTART:':'DTSTART;VALUE=DATE:')+dtS,
-    (time?'DTEND:':'DTEND;VALUE=DATE:')+dtE,
-    'SUMMARY:'+title, notes?'DESCRIPTION:'+notes:'','END:VEVENT','END:VCALENDAR'];
-  return lines.filter(Boolean).join('\r\n');
-}
-function addToGoogleCalendar(id) {
-  const item = items.find(i => i.id === id); if (!item) return;
-  window.open(buildGoogleCalUrl(item.title, item.notes, item.date, item.time), '_blank');
-}
-function addToAppleCalendar(id) {
-  const item = items.find(i => i.id === id); if (!item) return;
-  const blob = new Blob([buildAppleCalICS(item.title, item.notes, item.date, item.time)], {type:'text/calendar'});
-  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:item.title.replace(/[^a-z0-9]/gi,'_')+'.ics', style:'display:none'});
-  document.body.appendChild(a); a.click(); setTimeout(()=>{document.body.removeChild(a);},1000);
-}
-
-// ——— SMART TEXT PARSING (typed or voice) ———
-let parseTimer = null;
-function parseTypedInput(val) {
-  // Debounce — only parse date/time from typed input, never touch selectedContact
-  clearTimeout(parseTimer);
-  parseTimer = setTimeout(() => parseDateTimeOnly(val), 800);
-}
+function parseTypedInput(val) { clearTimeout(parseTimer); parseTimer = setTimeout(() => parseDateTimeOnly(val), 800); }
 
 function parseDateTimeOnly(text) {
-  // Only extract date and time — don't touch title or contact
-  const today = new Date();
-  let detectedDate = null;
-
+  const today = new Date(); let detectedDate = null;
   if (/\btoday\b/i.test(text)) { detectedDate = new Date(); }
   else if (/\btomorrow\b/i.test(text)) { detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1); }
   else {
     const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
     const nx = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
     if (nx) { const t=days.indexOf(nx[1].toLowerCase()),d=new Date(); d.setDate(d.getDate()+((t-d.getDay()+7)%7||7)+7); detectedDate=d; }
-    else {
-      const th = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
-      if (th) { const t=days.indexOf(th[1].toLowerCase()),d=new Date(); let diff=(t-d.getDay()+7)%7; if(!diff)diff=7; d.setDate(d.getDate()+diff); detectedDate=d; }
-    }
+    else { const th = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i); if (th) { const t=days.indexOf(th[1].toLowerCase()),d=new Date(); let diff=(t-d.getDay()+7)%7; if(!diff)diff=7; d.setDate(d.getDate()+diff); detectedDate=d; } }
   }
   if (!detectedDate) {
     const months=['january','february','march','april','may','june','july','august','september','october','november','december'];
-    const dm = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
-            || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
-    if (dm) {
-      let day,mon; if(months.includes(dm[1].toLowerCase())){mon=dm[1];day=dm[2];}else{day=dm[1];mon=dm[2];}
-      const d=new Date(today.getFullYear(),months.indexOf(mon.toLowerCase()),parseInt(day));
-      if(d<today)d.setFullYear(d.getFullYear()+1); detectedDate=d;
-    }
+    const dm = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i) || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    if (dm) { let day,mon; if(months.includes(dm[1].toLowerCase())){mon=dm[1];day=dm[2];}else{day=dm[1];mon=dm[2];} const d=new Date(today.getFullYear(),months.indexOf(mon.toLowerCase()),parseInt(day)); if(d<today)d.setFullYear(d.getFullYear()+1); detectedDate=d; }
   }
   if (detectedDate) {
     const yyyy=detectedDate.getFullYear(), mm=String(detectedDate.getMonth()+1).padStart(2,'0'), dd=String(detectedDate.getDate()).padStart(2,'0');
@@ -1421,93 +656,170 @@ function parseDateTimeOnly(text) {
     document.getElementById('date-panel').style.display='flex';
     updateDateLabel(); updateCalBtn();
   }
-
-  // Time: "at 7pm", "at 19:00", "at half past 7" etc
   const tm = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
   if (tm) {
     let h=parseInt(tm[1]), m=tm[2]?parseInt(tm[2]):0;
     const ap=tm[3]?tm[3].toLowerCase():null;
     if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<7)h+=12;
     const t=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
-    document.getElementById('item-time').value=t;
-    document.getElementById('date-panel').style.display='flex';
+    document.getElementById('item-time').value=t; document.getElementById('date-panel').style.display='flex';
     updateDateLabel(); suggestRemindTime(t);
-  } else {
-    const wordNums={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
-    const ph=s=>isNaN(s)?(wordNums[s.toLowerCase()]||0):parseInt(s);
-    const hp=text.match(/\bhalf\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    const qp=text.match(/\bquarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    const qt=text.match(/\bquarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
-    let t=null;
-    if(hp){let h=ph(hp[1]);if(h<7)h+=12;t=String(h).padStart(2,'0')+':30';}
-    else if(qp){let h=ph(qp[1]);if(h<7)h+=12;t=String(h).padStart(2,'0')+':15';}
-    else if(qt){let h=ph(qt[1])-1;if(h<7)h+=12;t=String(h).padStart(2,'0')+':45';}
-    if(t){
-      document.getElementById('item-time').value=t;
-      document.getElementById('date-panel').style.display='flex';
-      updateDateLabel(); suggestRemindTime(t);
-    }
   }
 }
 
-function clearRemindTime() {
-  document.getElementById('item-remind-time').value = '';
-  document.getElementById('remind-suggestion').style.display = 'none';
+function parseVoiceTranscript(transcript) {
+  let text = transcript, matched = []; const today = new Date(); let detectedDate = null;
+  if (/\btoday\b/i.test(text)) { detectedDate = new Date(); text = text.replace(/\btoday\b/i, ''); matched.push('date'); }
+  else if (/\btomorrow\b/i.test(text)) { detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1); text = text.replace(/\btomorrow\b/i, ''); matched.push('date'); }
+  else {
+    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const nx = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+    if (nx) { const t=days.indexOf(nx[1].toLowerCase()),d=new Date(); d.setDate(d.getDate()+((t-d.getDay()+7)%7||7)+7); detectedDate=d; text=text.replace(nx[0],''); matched.push('date'); }
+    else { const th=text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i); if(th){const t=days.indexOf(th[1].toLowerCase()),d=new Date();let diff=(t-d.getDay()+7)%7;if(!diff)diff=7;d.setDate(d.getDate()+diff);detectedDate=d;text=text.replace(th[0],'');matched.push('date');} }
+  }
+  if (!detectedDate) {
+    const months=['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const dm=text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)||text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    if(dm){let day,mon;if(months.includes(dm[1].toLowerCase())){mon=dm[1];day=dm[2];}else{day=dm[1];mon=dm[2];}const d=new Date(today.getFullYear(),months.indexOf(mon.toLowerCase()),parseInt(day));if(d<today)d.setFullYear(d.getFullYear()+1);detectedDate=d;text=text.replace(dm[0],'');matched.push('date');}
+  }
+  if (detectedDate) {
+    const yyyy=detectedDate.getFullYear(),mm=String(detectedDate.getMonth()+1).padStart(2,'0'),dd=String(detectedDate.getDate()).padStart(2,'0');
+    document.getElementById('date-panel').style.display='flex';
+    document.getElementById('item-date').value=yyyy+'-'+mm+'-'+dd; updateDateLabel();
+  }
+  const tm=text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+  if(tm){let h=parseInt(tm[1]),m=tm[2]?parseInt(tm[2]):0;const ap=tm[3]?tm[3].toLowerCase():null;if(ap==='pm'&&h<12)h+=12;if(ap==='am'&&h===12)h=0;if(!ap&&h<7)h+=12;const detTime=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');document.getElementById('item-time').value=detTime;document.getElementById('date-panel').style.display='flex';text=text.replace(tm[0],'');matched.push('time');updateDateLabel();suggestRemindTime(detTime);}
+  const sendPat=/\b(?:send\s+to|tell|message|remind|text|whatsapp)\s+(\w+)\b/i,sm=text.match(sendPat);
+  if(sm){const spoken=sm[1].toLowerCase();const found=(settings.contacts||[]).find(c=>c.name&&(c.name.toLowerCase()===spoken||c.name.toLowerCase().startsWith(spoken)));if(found){selectAddContact(found.name,found.phone||'');text=text.replace(sm[0],'');matched.push('send to '+found.name);}}
+  text=text.replace(/\s{2,}/g,' ').replace(/^[,\s]+|[,\s]+$/g,'').trim();
+  if(text)text=text.charAt(0).toUpperCase()+text.slice(1);
+  document.getElementById('item-title').value=text;
+  if(matched.length)showToast('✨ Got: '+matched.join(', '));
 }
+
+function clearRemindTime() { document.getElementById('item-remind-time').value=''; document.getElementById('remind-suggestion').style.display='none'; }
 
 function suggestRemindTime(eventTime) {
-  // Suggest 30 mins before the event time
   if (!eventTime) return;
-  const [h, m] = eventTime.split(':').map(Number);
-  let rh = h, rm = m - 30;
-  if (rm < 0) { rm += 60; rh -= 1; }
-  if (rh < 0) return;
-  const suggested = String(rh).padStart(2,'0') + ':' + String(rm).padStart(2,'0');
-  // Only auto-fill if not already set
-  const remindEl = document.getElementById('item-remind-time');
-  const suggEl = document.getElementById('remind-suggestion');
-  if (!remindEl.value) {
-    remindEl.value = suggested;
-    if (suggEl) {
-      suggEl.textContent = "💡 Suggested 30 mins before — change it if you like!";
-      suggEl.style.display = 'block';
-    }
-  }
+  const [h,m] = eventTime.split(':').map(Number); let rh=h, rm=m-30;
+  if(rm<0){rm+=60;rh-=1;} if(rh<0) return;
+  const suggested = String(rh).padStart(2,'0')+':'+String(rm).padStart(2,'0');
+  const remindEl = document.getElementById('item-remind-time'), suggEl = document.getElementById('remind-suggestion');
+  if(!remindEl.value){remindEl.value=suggested;if(suggEl){suggEl.textContent="💡 Suggested 30 mins before — change it if you like!";suggEl.style.display='block';}}
 }
 
-// ——— INDIVIDUAL ITEM REMINDERS ———
 function scheduleItemReminder(item) {
-  if (!item.remindTime || !item.date) return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const [h, m] = item.remindTime.split(':').map(Number);
-  const target = new Date(item.date + 'T' + item.remindTime + ':00');
-  const delay = target - new Date();
-  if (delay <= 0) return; // already passed
-  setTimeout(() => {
-    new Notification("🧠 Don't Forget!", {
-      body: item.title + (item.time ? ' — at ' + item.time : ''),
-      icon: '/favicon.ico'
-    });
-  }, delay);
+  if(!item.remindTime||!item.date) return;
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  const target=new Date(item.date+'T'+item.remindTime+':00'), delay=target-new Date();
+  if(delay<=0) return;
+  setTimeout(()=>{ new Notification("🧠 Don't Forget!",{body:item.title+(item.time?' — at '+item.time:'')});},delay);
 }
 
-function scheduleAllReminders() {
-  items.forEach(item => { if (!item.done) scheduleItemReminder(item); });
-}
-
-// ——— addToCalendar — shows picker for item cards
+function scheduleAllReminders() { items.forEach(item=>{if(!item.done)scheduleItemReminder(item);}); }
 
 function addToCalendar(id) { showCalPicker(id); }
-
-// Legacy inline send panel helpers (used in voice parsing)
 function renderInlineQuickContacts() { renderAddContactBtns(); }
-function selectInlineContact(name) {
-  const c = (settings.contacts||[]).find(c => c.name===name);
-  if (c) selectAddContact(c.name, c.phone||'');
+function selectInlineContact(name) { const c=(settings.contacts||[]).find(c=>c.name===name); if(c)selectAddContact(c.name,c.phone||''); }
+
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt=e; document.getElementById('installHeaderBtn').classList.remove('hidden'); if(!localStorage.getItem('df_banner_dismissed'))document.getElementById('installBanner').style.display='block'; });
+window.addEventListener('appinstalled', ()=>{ document.getElementById('installHeaderBtn').classList.add('hidden'); document.getElementById('installBanner').style.display='none'; });
+function handleInstallClick() { if(/iP(hone|ad|od)/.test(navigator.userAgent)){document.getElementById('iosModal').style.display='flex';return;} if(deferredPrompt)triggerInstall(); }
+function triggerInstall() { if(!deferredPrompt)return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{deferredPrompt=null;}); document.getElementById('installBanner').style.display='none'; }
+function dismissBanner() { document.getElementById('installBanner').style.display='none'; localStorage.setItem('df_banner_dismissed','1'); }
+function closeIosModal() { document.getElementById('iosModal').style.display='none'; }
+
+function toggleNotifications() {
+  const enabled=document.getElementById('notif-toggle').checked; settings.notifEnabled=enabled; persistSettings();
+  if(enabled){Notification.requestPermission().then(p=>{if(p==='granted'){scheduleNotification();showToast('🔔 Evening reminders on!');}else{showToast('Permission denied');document.getElementById('notif-toggle').checked=false;settings.notifEnabled=false;persistSettings();}});}
+  else showToast('🔕 Evening reminders off');
 }
 
+function saveSettingsSilent() { settings.notifTime=document.getElementById('notif-time').value; persistSettings(); }
+
+function scheduleNotification() {
+  if(!('Notification' in window)) return;
+  const [h,m]=(settings.notifTime||'19:00').split(':').map(Number);
+  const now=new Date(),target=new Date(); target.setHours(h,m,0,0);
+  if(target<=now)target.setDate(target.getDate()+1);
+  setTimeout(()=>{if(Notification.permission==='granted'&&items.filter(i=>!i.done).length){new Notification("🧠 Don't Forget!",{body:'You have '+items.filter(i=>!i.done).length+' things to check tonight!'});}},target-now);
+}
+
+function testNotification() {
+  if(!('Notification' in window)){showToast('Notifications not supported');return;}
+  Notification.requestPermission().then(p=>{if(p==='granted'){new Notification("🧠 Don't Forget!",{body:"This is what your reminder looks like!"});settings.notifEnabled=true;persistSettings();}else showToast('Permission denied');});
+}
+
+function loadSettings() {
+  const t=document.getElementById('notif-time'); if(t)t.value=settings.notifTime||'19:00';
+  const tog=document.getElementById('notif-toggle'); if(tog)tog.checked=!!settings.notifEnabled;
+}
+
+function saveContacts() {
+  const contacts=[];
+  for(let i=1;i<=5;i++){const name=(document.getElementById('contact-name-'+i)||{}).value||'';const phone=(document.getElementById('contact-phone-'+i)||{}).value||'';contacts.push({name:name.trim(),phone:phone.trim()});}
+  settings.contacts=contacts; settings.notifTime=(document.getElementById('notif-time')||{}).value||'19:00';
+  persistSettings(); renderAddContactBtns(); showToast('✅ Settings saved!');
+}
+
+function renderContactsSettings() {
+  for(let i=1;i<=5;i++){const c=(settings.contacts||[])[i-1]||{};const ne=document.getElementById('contact-name-'+i);const pe=document.getElementById('contact-phone-'+i);if(ne)ne.value=c.name||'';if(pe)pe.value=c.phone||'';}
+}
+
+function closeModal(e) { if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').style.display='none'; }
+function deleteItem(id) { items=items.filter(i=>i.id!==id); save(); renderAll(); showToast('🗑 Deleted!'); }
+function markDone(id) { const item=items.find(i=>i.id===id); if(!item)return; item.done=!item.done; save(); renderAll(); }
+function clearDone() { items=items.filter(i=>!i.done); save(); renderAll(); showToast('✅ Done items cleared!'); }
+function clearAll() { if(confirm('Delete everything?')){items=[];save();renderAll();showToast('🗑 All cleared!');} }
+
+function buildWhatsAppUrl(phone,message) { let c=(phone||'').replace(/[^0-9]/g,''); if(c.startsWith('0'))c='44'+c.slice(1); return c?'https://wa.me/'+c+'?text='+encodeURIComponent(message):'https://wa.me/?text='+encodeURIComponent(message); }
+function sendToContact(name,phone,msg) { window.open(buildWhatsAppUrl(phone,name+", just a heads up — don't forget: "+msg+"\n\n— Sent via Don't Forget! 🧠"),'_blank'); }
+
+function showToast(msg) {
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2d1f42;color:white;padding:10px 20px;border-radius:50px;font-weight:800;font-size:0.9rem;z-index:9999;opacity:0;transition:opacity 0.3s;white-space:nowrap;max-width:90vw;text-align:center;';document.body.appendChild(t);}
+  t.textContent=msg; t.style.opacity='1'; clearTimeout(t._to); t._to=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+function showCalPicker(id) {
+  const existing=document.getElementById('cal-picker-popup'); if(existing)existing.remove();
+  const item=items.find(i=>i.id===id); if(!item)return;
+  const popup=document.createElement('div');
+  popup.id='cal-picker-popup';
+  popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+  popup.innerHTML='<div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;">' +
+    '<div style="font-family:Righteous,cursive;font-size:1.3rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>' +
+    '<p style="color:#9575b5;font-size:0.88rem;margin-bottom:10px;">Opens straight in with everything filled — just tap Save!</p>' +
+    '<div style="background:#fff8f0;border:1px solid #f5c97a;border-radius:10px;padding:10px 12px;font-size:0.8rem;color:#7a5a20;margin-bottom:16px;">💡 <strong>Apple Calendar tip:</strong> Ignore the blue ✓ tick — it doesn\'t add it. Scroll down and tap <strong>Add to Calendar</strong> instead.</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;">' +
+    '<button onclick="addToGoogleCalendar(' + id + ');document.getElementById(\'cal-picker-popup\').remove();" style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">📅 Google Calendar</button>' +
+    '<button onclick="addToAppleCalendar(' + id + ');document.getElementById(\'cal-picker-popup\').remove();" style="background:#5b21b6;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">🍎 Apple Calendar</button>' +
+    '<button onclick="document.getElementById(\'cal-picker-popup\').remove();" style="background:#ede9f8;color:#7c3aed;border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Cancel</button>' +
+    '</div></div>';
+  document.body.appendChild(popup);
+  popup.addEventListener('click',e=>{if(e.target===popup)popup.remove();});
+}
+
+function buildGoogleCalUrl(title,notes,date,time) {
+  const ds=date.replace(/-/g,''); let dates;
+  if(time){const[h,m]=time.split(':').map(Number);const eh=String(h+1).padStart(2,'0'),ms=String(m).padStart(2,'0'),hs=String(h).padStart(2,'0');dates=ds+'T'+hs+ms+'00/'+ds+'T'+eh+ms+'00';}
+  else{const nd=new Date(date+'T00:00:00');nd.setDate(nd.getDate()+1);dates=ds+'/'+nd.toISOString().split('T')[0].replace(/-/g,'');}
+  return 'https://calendar.google.com/calendar/render?'+new URLSearchParams({action:'TEMPLATE',text:title,dates,details:notes||''});
+}
+
+function buildAppleCalICS(title,notes,date,time) {
+  const ds=date.replace(/-/g,''); let dtS,dtE;
+  if(time){const[h,m]=time.split(':').map(Number);dtS=ds+'T'+String(h).padStart(2,'0')+String(m).padStart(2,'0')+'00';dtE=ds+'T'+String(h+1).padStart(2,'0')+String(m).padStart(2,'0')+'00';}
+  else{dtS=ds;const nd=new Date(date+'T00:00:00');nd.setDate(nd.getDate()+1);dtE=nd.toISOString().split('T')[0].replace(/-/g,'');}
+  const now=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DontForget//EN','BEGIN:VEVENT','UID:df-'+Date.now()+'@dontforget','DTSTAMP:'+now,(time?'DTSTART:':'DTSTART;VALUE=DATE:')+dtS,(time?'DTEND:':'DTEND;VALUE=DATE:')+dtE,'SUMMARY:'+title,notes?'DESCRIPTION:'+notes:'','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
+}
+
+function addToGoogleCalendar(id) { const item=items.find(i=>i.id===id);if(!item)return;window.open(buildGoogleCalUrl(item.title,item.notes,item.date,item.time),'_blank'); }
+function addToAppleCalendar(id) { const item=items.find(i=>i.id===id);if(!item)return;const blob=new Blob([buildAppleCalICS(item.title,item.notes,item.date,item.time)],{type:'text/calendar'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:item.title.replace(/[^a-z0-9]/gi,'_')+'.ics',style:'display:none'});document.body.appendChild(a);a.click();setTimeout(()=>document.body.removeChild(a),1000); }
+
 renderAll();
-if (settings.notifEnabled) scheduleNotification();
+if(settings.notifEnabled)scheduleNotification();
 scheduleAllReminders();
 </script>
 </body>
