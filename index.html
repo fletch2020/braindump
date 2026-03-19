@@ -938,18 +938,60 @@ function clearAddForm() {
   document.getElementById('voice-btn').classList.remove('listening');
 }
 
+function buildMsg(item) {
+  return (selectedContact ? selectedContact.name + ", just a heads up — don't forget: " : "Don't forget: ")
+    + item.title
+    + (item.date ? '\n📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '')
+    + "\n\n— Sent via Don't Forget! 🧠";
+}
+
 function saveSendWhatsApp() {
   const item = buildItemFromForm();
   if (!item) return;
-  if (!selectedContact) { showToast('Tap a contact to send to!'); return; }
-  if (!selectedContact.phone) { showToast('No number saved for ' + selectedContact.name + ' — check Settings'); return; }
+  if (!selectedContact) { showToast('👆 Tap a contact name above first!'); return; }
+  if (!selectedContact.phone) { showToast('No number for ' + selectedContact.name + ' — add it in Settings'); return; }
+  showSendPreview(item, selectedContact, false);
+}
+
+function showSendPreview(item, contact, withCal) {
+  const existing = document.getElementById('send-preview-popup');
+  if (existing) existing.remove();
+  const msg = buildMsg(item);
+  const popup = document.createElement('div');
+  popup.id = 'send-preview-popup';
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+  popup.innerHTML = `
+    <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:420px;">
+      <div style="font-family:Righteous,cursive;font-size:1.2rem;color:var(--accent1);margin-bottom:12px;">📱 Message Preview</div>
+      <div style="background:#e8f5e9;border-radius:12px;padding:14px;font-size:0.9rem;color:#1a1a1a;white-space:pre-wrap;margin-bottom:16px;line-height:1.5;">${msg}</div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Sending to <strong>${contact.name}</strong> — looks right?</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="confirmSend(${JSON.stringify(JSON.stringify(item))}, ${JSON.stringify(JSON.stringify(contact))}, ${withCal})"
+          style="background:var(--accent1);color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
+          ✅ Yes, send it!
+        </button>
+        <button onclick="document.getElementById('send-preview-popup').remove();"
+          style="background:#ede9f8;color:var(--accent1);border:none;border-radius:50px;padding:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
+          ✏️ Edit first
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  popup.addEventListener('click', e => { if(e.target===popup) popup.remove(); });
+}
+
+function confirmSend(itemJson, contactJson, withCal) {
+  document.getElementById('send-preview-popup').remove();
+  const item = JSON.parse(itemJson);
+  const contact = JSON.parse(contactJson);
   items.unshift(item); save();
-  const msg = selectedContact.name + ", just a heads up — don't forget: " + item.title
+  const msg = (contact.name ? contact.name + ", just a heads up — don't forget: " : '') + item.title
     + (item.date ? '\n📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '')
     + "\n\n— Sent via Don't Forget! 🧠";
-  window.open(buildWhatsAppUrl(selectedContact.phone, msg), '_blank');
+  window.open(buildWhatsAppUrl(contact.phone, msg), '_blank');
+  if (withCal) { setTimeout(() => showCalPicker(item.id), 600); }
   clearAddForm(); showTab('today');
-  showToast('✅ Saved & sent to ' + selectedContact.name + '!');
+  showToast('✅ Saved & sent to ' + contact.name + '!');
 }
 
 function saveOnlyItem() {
@@ -975,16 +1017,9 @@ function saveSendAndCalendar() {
   const item = buildItemFromForm();
   if (!item) return;
   if (!item.date) { showToast('Please add a date first!'); return; }
-  if (!selectedContact) { showToast('Tap a contact to send to!'); return; }
-  if (!selectedContact.phone) { showToast('No number saved for ' + selectedContact.name + ' — check Settings'); return; }
-  items.unshift(item); save();
-  const msg = selectedContact.name + ", just a heads up — don't forget: " + item.title
-    + (item.date ? '\n📅 ' + formatDate(item.date) + (item.time ? ' at ' + item.time : '') : '')
-    + "\n\n— Sent via Don't Forget! 🧠";
-  window.open(buildWhatsAppUrl(selectedContact.phone, msg), '_blank');
-  clearAddForm(); showTab('today');
-  showToast('✅ Saved & sent! Now choose your calendar...');
-  setTimeout(() => showCalPicker(item.id), 600);
+  if (!selectedContact) { showToast('👆 Tap a contact name above first!'); return; }
+  if (!selectedContact.phone) { showToast('No number for ' + selectedContact.name + ' — add it in Settings'); return; }
+  showSendPreview(item, selectedContact, true);
 }
 
 // Keep old saveItem as alias
@@ -1349,9 +1384,70 @@ function addToAppleCalendar(id) {
 // ——— SMART TEXT PARSING (typed or voice) ———
 let parseTimer = null;
 function parseTypedInput(val) {
-  // Debounce — only parse after user stops typing for 800ms
+  // Debounce — only parse date/time from typed input, never touch selectedContact
   clearTimeout(parseTimer);
-  parseTimer = setTimeout(() => parseVoiceTranscript(val), 800);
+  parseTimer = setTimeout(() => parseDateTimeOnly(val), 800);
+}
+
+function parseDateTimeOnly(text) {
+  // Only extract date and time — don't touch title or contact
+  const today = new Date();
+  let detectedDate = null;
+
+  if (/\btoday\b/i.test(text)) { detectedDate = new Date(); }
+  else if (/\btomorrow\b/i.test(text)) { detectedDate = new Date(); detectedDate.setDate(detectedDate.getDate()+1); }
+  else {
+    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const nx = text.match(/\bnext\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+    if (nx) { const t=days.indexOf(nx[1].toLowerCase()),d=new Date(); d.setDate(d.getDate()+((t-d.getDay()+7)%7||7)+7); detectedDate=d; }
+    else {
+      const th = text.match(/\b(?:this\s+|on\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+      if (th) { const t=days.indexOf(th[1].toLowerCase()),d=new Date(); let diff=(t-d.getDay()+7)%7; if(!diff)diff=7; d.setDate(d.getDate()+diff); detectedDate=d; }
+    }
+  }
+  if (!detectedDate) {
+    const months=['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const dm = text.match(/\b(?:the\s+)?(\d{1,2}(?:st|nd|rd|th)?)\s+(?:of\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)
+            || text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:st|nd|rd|th)?)\b/i);
+    if (dm) {
+      let day,mon; if(months.includes(dm[1].toLowerCase())){mon=dm[1];day=dm[2];}else{day=dm[1];mon=dm[2];}
+      const d=new Date(today.getFullYear(),months.indexOf(mon.toLowerCase()),parseInt(day));
+      if(d<today)d.setFullYear(d.getFullYear()+1); detectedDate=d;
+    }
+  }
+  if (detectedDate) {
+    const yyyy=detectedDate.getFullYear(), mm=String(detectedDate.getMonth()+1).padStart(2,'0'), dd=String(detectedDate.getDate()).padStart(2,'0');
+    document.getElementById('item-date').value=yyyy+'-'+mm+'-'+dd;
+    document.getElementById('date-panel').style.display='flex';
+    updateDateLabel(); updateCalBtn();
+  }
+
+  // Time: "at 7pm", "at 19:00", "at half past 7" etc
+  const tm = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+  if (tm) {
+    let h=parseInt(tm[1]), m=tm[2]?parseInt(tm[2]):0;
+    const ap=tm[3]?tm[3].toLowerCase():null;
+    if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<7)h+=12;
+    const t=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    document.getElementById('item-time').value=t;
+    document.getElementById('date-panel').style.display='flex';
+    updateDateLabel(); suggestRemindTime(t);
+  } else {
+    const wordNums={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};
+    const ph=s=>isNaN(s)?(wordNums[s.toLowerCase()]||0):parseInt(s);
+    const hp=text.match(/\bhalf\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qp=text.match(/\bquarter\s+past\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    const qt=text.match(/\bquarter\s+to\s+(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i);
+    let t=null;
+    if(hp){let h=ph(hp[1]);if(h<7)h+=12;t=String(h).padStart(2,'0')+':30';}
+    else if(qp){let h=ph(qp[1]);if(h<7)h+=12;t=String(h).padStart(2,'0')+':15';}
+    else if(qt){let h=ph(qt[1])-1;if(h<7)h+=12;t=String(h).padStart(2,'0')+':45';}
+    if(t){
+      document.getElementById('item-time').value=t;
+      document.getElementById('date-panel').style.display='flex';
+      updateDateLabel(); suggestRemindTime(t);
+    }
+  }
 }
 
 function clearRemindTime() {
