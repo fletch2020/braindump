@@ -616,6 +616,7 @@
 <script>
 // ——— DATA ———
 let items = JSON.parse(localStorage.getItem('df_items') || '[]');
+let selectedContact = null; // persists across renders
 let settings = JSON.parse(localStorage.getItem('df_settings') || JSON.stringify({
   notifTime: '19:00',
   notifEnabled: false,
@@ -815,8 +816,6 @@ function resetChecklist() {
 }
 
 // ——— ADD FORM ———
-let selectedContact = null; // { name, phone }
-
 function renderAddContactBtns() {
   const container = document.getElementById('add-contact-btns');
   if (!container) return;
@@ -827,7 +826,8 @@ function renderAddContactBtns() {
   }
   container.innerHTML = contacts.map(c => {
     const sid = 'ac-' + c.name.replace(/[^a-zA-Z0-9]/g,'_');
-    return `<button class="contact-select-btn" id="${sid}" onclick="selectAddContact(${JSON.stringify(c.name)}, ${JSON.stringify(c.phone || '')})">${c.name}</button>`;
+    const isSelected = selectedContact && selectedContact.name === c.name;
+    return `<button class="contact-select-btn ${isSelected ? 'selected' : ''}" id="${sid}" onclick="selectAddContact(${JSON.stringify(c.name)}, ${JSON.stringify(c.phone || '')})">${c.name}</button>`;
   }).join('');
 }
 
