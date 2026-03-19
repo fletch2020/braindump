@@ -1210,7 +1210,10 @@ function showCalPicker(id) {
   popup.innerHTML = `
     <div style="background:#faf8fd;border-radius:20px;padding:24px;width:100%;max-width:400px;">
       <div style="font-family:Righteous,cursive;font-size:1.3rem;color:#7c3aed;margin-bottom:6px;">📅 Add to Calendar</div>
-      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:16px;">Opens straight in with everything filled — just tap Save!</p>
+      <p style="color:#9575b5;font-size:0.88rem;margin-bottom:10px;">Opens straight in with everything filled — just tap Save!</p>
+      <div style="background:#fff8f0;border:1px solid #f5c97a;border-radius:10px;padding:10px 12px;font-size:0.8rem;color:#7a5a20;margin-bottom:16px;">
+        💡 <strong>Apple Calendar tip:</strong> When it opens, ignore the blue ✓ tick in the corner — that doesn't add it. Scroll down and tap the <strong>Add to Calendar</strong> button at the bottom instead.
+      </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         <button onclick="addToGoogleCalendar(${id}); document.getElementById('cal-picker-popup').remove();"
           style="background:#7c3aed;color:white;border:none;border-radius:50px;padding:14px;font-family:Nunito,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
